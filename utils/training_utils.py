@@ -1,0 +1,199 @@
+import os
+import copy
+import torch
+import torch.nn as nn
+import torchvision
+import torchvision.transforms as transforms
+
+from csv import writer as csv_writer, QUOTE_ALL
+from collections import Counter
+from utils.inceptionv1_caffe import InceptionV1_Caffe
+
+
+
+# Calculate the size of training and validation datasets
+def split_percent(n, pctg=0.2):
+    return [round(n * (1 - pctg)), round(n * pctg)]
+
+
+# Create training and validation images from single set of images
+def load_dataset(data_path='test_data', val_percent=0.2, batch_size=1, input_size=(224,224), \
+                       input_mean=[0.485, 0.456, 0.406], input_sd=[0.229, 0.224, 0.225], use_caffe=False, \
+                       train_workers=25, val_workers=5, balance_weights=False):
+
+    num_classes = sum(os.path.isdir(os.path.join(data_path, i)) for i in os.listdir(data_path))
+
+    train_transform_list = [
+        transforms.RandomRotation(5),
+        transforms.RandomResizedCrop(input_size),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=input_mean, std=input_sd),
+    ]
+    val_transform_list = [
+        transforms.Resize(input_size),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=input_mean, std=input_sd),
+    ]
+
+    if use_caffe:
+        range_change = transforms.Compose([transforms.Lambda(lambda x: x*255)])
+        rgb2bgr = transforms.Compose([transforms.Lambda(lambda x: x[torch.LongTensor([2,1,0])])])
+        train_transform_list = train_transform_list[:-1] + [range_change] + [rgb2bgr] + [train_transform_list[-1]]
+        val_transform_list = val_transform_list[:-1] + [range_change] + [rgb2bgr] + [val_transform_list[-1]]
+
+    # Load all images
+    full_dataset = torchvision.datasets.ImageFolder(
+        root=data_path,
+    )
+
+    print('\nTotal ' + str(len(full_dataset)) + ' images, split into ' + str(num_classes) + ' classes')
+    get_fc_channel_classes(data_path)
+    if val_percent > 0:
+        lengths = split_percent(len(full_dataset), val_percent)
+        t_data, v_data = torch.utils.data.random_split(full_dataset, lengths)
+    else:
+        t_data, v_data = copy.deepcopy(full_dataset), copy.deepcopy(full_dataset)
+
+    # Use separate transforms for training and validation data
+    t_data = copy.deepcopy(t_data)
+    t_data.dataset.transform = transforms.Compose(train_transform_list)
+    v_data.dataset.transform = transforms.Compose(val_transform_list)
+
+    train_loader = torch.utils.data.DataLoader(
+        t_data,
+        batch_size=batch_size,
+        num_workers=train_workers,
+        shuffle=True,
+    )
+    val_loader = torch.utils.data.DataLoader(
+        v_data,
+        batch_size=batch_size,
+        num_workers=val_workers,
+        shuffle=True,
+    )
+
+    if balance_weights:
+        train_class_counts = count_classes(train_loader.dataset)
+        train_weights = [1 / train_class_counts[class_id] for class_id in range(num_classes)]
+        train_weights = torch.FloatTensor(train_weights)
+        return {'train': train_loader, 'val': val_loader}, num_classes, train_weights
+    else:
+        return {'train': train_loader, 'val': val_loader}, num_classes
+
+
+# Get the number of images in each class in a dataset
+def count_classes(dataset):
+    class_counts = dict(Counter(sample_tup[1] for sample_tup in dataset))
+    return dict(sorted(class_counts.items()))
+
+
+# Save model without extra training info
+def save_model_simple(model, name):
+    model = copy.deepcopy(model)
+    torch.save(model.state_dict(), name)
+
+
+# Save model with info needed to continue later
+def save_model(model, optimizer=None, lrscheduler=None, loss=0, epoch=0, output_name='test.pth', fc_only=False, save_info=None):
+    output_filename, file_extension = os.path.splitext(output_name)
+    save_name = output_filename + str(epoch).zfill(3) + file_extension
+
+    model = copy.deepcopy(model)
+    if fc_only:
+        model = model.fc
+    save_model = {'model_state_dict': model.state_dict()}
+    if epoch != 0:
+        save_model['epoch'] = epoch
+    if optimizer != None:
+        save_model['optimizer_state_dict'] = optimizer.state_dict()
+    if lrscheduler != None:
+        save_model['lrscheduler_state_dict'] = lrscheduler.state_dict()
+    if save_info != None:
+        save_model['normalize_params'] = save_info[0]
+        save_model['num_classes'] = save_info[1]
+        save_model['has_branches'] = save_info[2]
+    torch.save(save_model, save_name)
+
+
+# Reset model weights
+def reset_weights(m):
+    if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+        torch.nn.init.kaiming_uniform_(m.weight)
+        m.bias.data.fill_(0)
+
+
+# Set global seed
+def set_seed(seed):
+    import random
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic=True
+    random.seed(seed)
+
+
+# Get classnames and order used by PyTorch
+def get_fc_channel_classes(data_path):
+    classes = [d.name for d in os.scandir(data_path) if d.is_dir()]
+    classes.sort()
+    class_to_idx = {cls_name: i for i, cls_name in enumerate(classes)}
+    print('Classes:')
+    print('', class_to_idx)
+
+
+# Save list as CSV
+def save_csv_data(filename, new_line):
+    with open(filename, "a+", newline='') as f:
+        wr = csv_writer(f, quoting=QUOTE_ALL)
+        wr.writerow(new_line)
+
+
+# Load model class and optionally reset weights
+def setup_model(model_file='bn', num_classes=120, pretrained=False):
+    base_list = {'pt_bvlc.pth': 1000}
+    base_name = os.path.basename(model_file)
+    if base_name.lower() in base_list:
+        load_classes = base_list[base_name.lower()]
+        is_start_model = True
+    else:
+        load_classes = num_classes
+        is_start_model = False
+
+    cnn = InceptionV1_Caffe(load_classes, mode='bvlc')
+
+    if not pretrained:
+        cnn.apply(reset_weights)
+    return cnn, is_start_model
+
+
+# Load checkpoint
+def load_checkpoint(cnn, model_file, optimizer, lrscheduler, num_classes, device='cuda:0', is_start_model=True):
+    start_epoch = 1
+
+    checkpoint = torch.load(model_file, map_location='cpu')
+    if type(checkpoint) == dict:
+        model_keys = list(checkpoint.keys())
+
+        if not is_start_model:
+            cnn.replace_fc(num_classes, True)
+
+        cnn.load_state_dict(checkpoint['model_state_dict'])
+
+        if 'optimizer_state_dict' in model_keys:
+            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            for state in optimizer.state.values():
+                for k, v in state.items():
+                    if isinstance(v, torch.Tensor):
+                        state[k] = v.to(device)
+        if 'lrscheduler_state_dict' in model_keys:
+            lrscheduler.load_state_dict(checkpoint['lrscheduler_state_dict'])
+        if 'epoch' in model_keys:
+            start_epoch = checkpoint['epoch']
+    else:
+        cnn.load_state_dict(checkpoint)
+
+    # Setup model for new data set
+    if is_start_model:
+        cnn.replace_fc(num_classes, True)
+    return cnn, optimizer, lrscheduler, start_epoch
