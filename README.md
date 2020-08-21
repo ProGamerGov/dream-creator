@@ -183,7 +183,6 @@ After training a new DeepDream model, you'll need to test it's visualizations. T
 **Output options**:
 * `-print_iter`: Print progress every `print_iter` iterations. Set to `0` to disable printing.
 * `-save_iter`: Save the images every `save_iter` iterations. Default is to `0` to disable saving intermediate results.
-* `-print_iter`: Print progress every `print_iter` iterations. Set to `0` to disable printing.
 
 **Other options:**
 * `-use_device`: Zero-indexed ID of the GPU to use plus `cuda:`. Default is `cuda:0`.
@@ -218,7 +217,6 @@ This script lets you create DeepDream hallucinations with trained GoogleNet mode
 **Output options**:
 * `-print_iter`: Print progress every `print_iter` iterations. Set to `0` to disable printing.
 * `-save_iter`: Save the images every `save_iter` iterations. Default is to `0` to disable saving intermediate results.
-* `-print_iter`: Print progress every `print_iter` iterations. Set to `0` to disable printing.
 
 **Other options:**
 * `-use_device`: Zero-indexed ID of the GPU to use plus `cuda:`. Default is `cuda:0`.
