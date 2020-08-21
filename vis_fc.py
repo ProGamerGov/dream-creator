@@ -24,6 +24,7 @@ def main():
     parser.add_argument("-model_epoch", type=int, default=10)
     parser.add_argument("-save_iter", type=int, default=0)
     parser.add_argument("-print_iter", type=int, default=25)
+    parser.add_argument("-output_dir", type=str, default='')
 
     # Optimization options
     parser.add_argument( "-lr", "-learning_rate", type=float, default=1.5)
@@ -79,7 +80,6 @@ def main_func(params):
     loss_func = mean_loss
     loss_modules = register_hook_batch(net.net, params.layer, loss_func=loss_func)
 
-
     input_tensor = torch.randn(3,224,224).to('cuda:0') * 0.01
     input_tensor_list = []
     for t in range(num_classes):
@@ -89,16 +89,18 @@ def main_func(params):
     print('Visualizing ' + str(num_classes) + ' ' + params.layer + ' channels')
     print('Running optimization with ADAM')
 
+    output_basename = os.path.join(params.output_dir, params.layer)
+
     # Create 224x224 image
     output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.data_mean, \
-                          params.save_iter, params.print_iter, params.not_caffe, model_epoch, params.layer, params.save_csv)
+                          params.save_iter, params.print_iter, params.not_caffe, model_epoch, output_basename, params.save_csv)
     for batch in range(output_tensor.size(0)):
-        simple_deprocess(output_tensor[batch], params.layer + '_c' + str(batch).zfill(2) + '_e' + str(model_epoch).zfill(3) + \
+        simple_deprocess(output_tensor[batch], output_basename + '_c' + str(batch).zfill(2) + '_e' + str(model_epoch).zfill(3) + \
                          '.jpg', params.data_mean, params.not_caffe)
 
 
 # Function to maximize CNN activations
-def dream(net, img, iterations, lr, loss_modules, m, save_iter, print_iter, use_caffe, epoch, layer, should_save_csv):
+def dream(net, img, iterations, lr, loss_modules, m, save_iter, print_iter, use_caffe, epoch, output_basename, should_save_csv):
     img = nn.Parameter(img)
     optimizer = torch.optim.Adam([img], lr=lr)
 
@@ -116,7 +118,7 @@ def dream(net, img, iterations, lr, loss_modules, m, save_iter, print_iter, use_
 
         if save_iter > 0 and i > 0 and i % save_iter == 0:
             for batch in range(img.size(0)):
-                simple_deprocess(img[batch].detach(), layer + '_c' + str(batch).zfill(2) + '_e' + str(epoch).zfill(3) + '_' + str(i).zfill(4) + '.jpg', m, use_caffe)
+                simple_deprocess(img[batch].detach(), output_basename + '_c' + str(batch).zfill(2) + '_e' + str(epoch).zfill(3) + '_' + str(i).zfill(4) + '.jpg', m, use_caffe)
         optimizer.step()
     return img.detach()
 
