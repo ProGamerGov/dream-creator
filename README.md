@@ -171,12 +171,12 @@ After training a new DeepDream model, you'll need to test it's visualizations. T
 
 **Input options:**
 * `-model_file`: Path to the pretrained GoogleNet model that you wish to use.
-* `-model_epoch`: The training epoch that the model was saved from, to use for the output image names. Default is `120`.
 * `-learning_rate`: Learning rate to use with the ADAM or L-BFGS optimizer. Default is `1.5`.
 * `-optimizer`: The optimization algorithm to use; either `lbfgs` or `adam`; default is `adam`.
 * `-num_iterations`: Default is 500.
 
 **Only Required If Model Doesn't Contain Them, Options**:
+* `-model_epoch`: The training epoch that the model was saved from, to use for the output image names. Default is `120`.
 * `-data_mean`: Your precalculated list of mean values that was used to train the model, if they weren't saved inside the model.
 * `-num_classes`: The number of classes that the model was trained on. Default is `120`.
 
@@ -192,7 +192,7 @@ After training a new DeepDream model, you'll need to test it's visualizations. T
 Basic FC (logits) layer visualization:
 
 ```
-python vis_fc.py -model_file <bvlc_out120>.pth -model_epoch <120>
+python vis_fc.py -model_file <bvlc_out120>.pth
 ```
 
 ---
