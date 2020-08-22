@@ -114,6 +114,7 @@ def save_model(model, optimizer=None, lrscheduler=None, loss=0, epoch=0, output_
         save_model['normalize_params'] = save_info[0]
         save_model['num_classes'] = save_info[1]
         save_model['has_branches'] = save_info[2]
+        save_model['base_model'] = save_info[3]
     torch.save(save_model, save_name)
 
 
