@@ -152,7 +152,7 @@ def save_csv_data(filename, new_line):
 
 # Load model class and optionally reset weights
 def setup_model(model_file='bn', num_classes=120, pretrained=False):
-    base_list = {'pt_bvlc.pth': 1000}
+    base_list = {'pt_bvlc.pth': 1000, 'pt_places365.pth': 365, 'pt_inception5h.pth': 1008}
     base_name = os.path.basename(model_file)
     if base_name.lower() in base_list:
         load_classes = base_list[base_name.lower()]
