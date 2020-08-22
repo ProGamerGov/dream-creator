@@ -88,7 +88,6 @@ def load_model(model_file, num_classes=120, has_branches=True, mode='bvlc'):
         h_branches = None
     has_branches = has_branches if h_branches == None else h_branches
 
-    print(has_branches)
     cnn = build_model(model_file, mode, num_classes, load_branches=has_branches)
 
     if type(checkpoint) == dict:
