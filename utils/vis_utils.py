@@ -48,7 +48,7 @@ def simple_deprocess(output_tensor, output_name, input_mean, not_caffe):
 
 # Build the model definition
 def build_model(model_file='pt_places365.pth', num_classes=120, load_branches=True):
-    base_list = {'pt_places365.pth': 365, 'pt_inception5h.pth': 1008, 'pt_bvlc.pth': 1000}
+    base_list = {'pt_bvlc.pth': 1000, 'pt_places365.pth': 365, 'pt_inception5h.pth': 1008}
     base_name = os.path.basename(model_file)
     if base_name.lower() in base_list:
         load_classes = base_list[base_name.lower()]
