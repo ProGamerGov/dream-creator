@@ -14,6 +14,7 @@ def main():
     parser.add_argument("-model_file", type=str, default='models/pt_bvlc.pth')
     parser.add_argument("-data_mean", type=str, default='')
     parser.add_argument("-data_sd", type=str, default='')
+    parser.add_argument("-base_model", choices=['bvlc', 'p365', '5h'], default='bvlc')
 
     # Training options
     parser.add_argument("-num_epochs", type=int, default=120)
@@ -69,7 +70,7 @@ def main_func(params):
 
 
     # Setup model definition
-    cnn, is_start_model = setup_model(params.model_file, num_classes=num_classes, pretrained=not params.reset_weights)
+    cnn, is_start_model, base_model = setup_model(params.model_file, num_classes=num_classes, base_model=params.base_model, pretrained=not params.reset_weights)
 
     if params.optimizer == 'sgd':
         optimizer = optim.SGD(cnn.parameters(), lr=params.lr, momentum=0.9)
@@ -145,7 +146,7 @@ def main_func(params):
         torch.backends.cudnn.enabled = True
 
 
-    save_info = [[params.data_mean, params.data_sd], num_classes, has_branches, 'bvlc_googlenet']
+    save_info = [[params.data_mean, params.data_sd], num_classes, has_branches, base_model]
 
     # Train model
     train_model(model=cnn, dataloaders=training_data, criterion=criterion, optimizer=optimizer, lrscheduler=lrscheduler, \
