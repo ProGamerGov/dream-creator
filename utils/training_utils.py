@@ -151,21 +151,29 @@ def save_csv_data(filename, new_line):
 
 
 # Load model class and optionally reset weights
-def setup_model(model_file='bn', num_classes=120, pretrained=False):
-    base_list = {'pt_bvlc.pth': 1000, 'pt_places365.pth': 365, 'pt_inception5h.pth': 1008}
-    base_name = os.path.basename(model_file)
+def setup_model(model_file='pt_bvlc.pth', num_classes=120, base_model='bvlc', pretrained=False):
+    try:
+        base_model = torch.load(model_file, map_location='cpu')['base_model']
+    except:
+        pass
+
+    base_list = {'pt_bvlc.pth': (1000, 'bvlc'), 'pt_places365.pth': (365, 'p365'), 'pt_inception5h.pth': (1008, '5h')}
+    base_name, has_branches = os.path.basename(model_file), True
     if base_name.lower() in base_list:
-        load_classes = base_list[base_name.lower()]
+        load_classes, mode = base_list[base_name.lower()]
         is_start_model = True
+        if mode == '5h':
+            has_branches = False
     else:
         load_classes = num_classes
         is_start_model = False
 
-    cnn = InceptionV1_Caffe(load_classes, mode='bvlc')
+    print(has_branches)
+    cnn = InceptionV1_Caffe(load_classes, mode=mode, load_branches=has_branches)
 
     if not pretrained:
         cnn.apply(reset_weights)
-    return cnn, is_start_model
+    return cnn, is_start_model, mode
 
 
 # Load checkpoint
