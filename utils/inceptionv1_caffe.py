@@ -72,10 +72,10 @@ class InceptionV1_Caffe(nn.Module):
 
         if self.mode == 'p365' or self.mode == 'bvlc':
             lrn_vals = (5, 9.999999747378752e-05, 0.75, 1)
-            diff_channels = [208, 512, 32]
+            diff_channels = [208, 512, 32, 512]
         elif self.mode == '5h':
             lrn_vals = (9, 9.99999974738e-05, 0.5, 1)
-            diff_channels = [204, 508, 48]
+            diff_channels = [204, 508, 48, 508]
 
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=(7, 7), stride=(2, 2), padding=(3,3), groups=1, bias=True)
         self.conv1_relu = ReluLayer()
@@ -107,7 +107,7 @@ class InceptionV1_Caffe(nn.Module):
             self.fc = nn.Linear(1024, out_features)
 
         if load_branches:
-            self.aux1 = AuxBranch(512, out_features)
+            self.aux1 = AuxBranch(diff_channels[3], out_features)
             self.aux2 = AuxBranch(528, out_features)
 
 
@@ -135,6 +135,8 @@ class InceptionV1_Caffe(nn.Module):
         self.fc = nn.Linear(1024, out_features)
         self.fc.apply(self.initialize_layers)
         if use_branches or self.use_branches:
+            if use_branches and self.use_branches == False:
+                self.add_branches(out_features)
             self.use_branches = True
             self.aux1.loss_classifier = nn.Linear(in_features = 1024, out_features = out_features, bias = True)
             self.aux2.loss_classifier = nn.Linear(in_features = 1024, out_features = out_features, bias = True)
