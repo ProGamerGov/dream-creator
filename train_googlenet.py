@@ -30,6 +30,7 @@ def main():
     parser.add_argument("-output_name", type=str, default='bvlc_out.pth')
     parser.add_argument("-individual_acc", action='store_true')
     parser.add_argument("-save_csv", action='store_true')
+    parser.add_argument("-csv_dir", type=str, default='')
 
     # Other options
     parser.add_argument("-not_caffe", action='store_true')
@@ -152,7 +153,7 @@ def main_func(params):
     train_model(model=cnn, dataloaders=training_data, criterion=criterion, optimizer=optimizer, lrscheduler=lrscheduler, \
                 num_epochs=params.num_epochs, start_epoch=start_epoch, save_epoch=params.save_epoch, output_name=params.output_name, \
                 device=params.use_device, has_branches=has_branches, fc_only=False, num_classes=num_classes, individual_acc=params.individual_acc, \
-                should_save_csv=params.save_csv, save_info=save_info)
+                should_save_csv=params.save_csv, csv_path=params.csv_dir, save_info=save_info)
 
 
 
