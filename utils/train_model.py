@@ -6,7 +6,7 @@ from utils.training_utils import save_model, count_classes, save_csv_data
 # Training function adapted from: https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html
 def train_model(model, dataloaders, criterion, optimizer=None, lrscheduler=None, num_epochs=120, start_epoch=1, save_epoch=1, \
                 output_name='out.pth', device='cuda:0', has_branches=False, fc_only=False, num_classes=0, individual_acc = False, \
-                should_save_csv=False, save_info=None):
+                should_save_csv=False, csv_path='', save_info=None):
 
     if individual_acc:
         data_counts = {}
@@ -76,7 +76,7 @@ def train_model(model, dataloaders, criterion, optimizer=None, lrscheduler=None,
             if individual_acc:
                 print('  Class Acc:', {i:j for i,j in enumerate(class_acc)})
                 if should_save_csv:
-                    save_csv_data(phase + '_acc.txt', [str(epoch)] + class_acc)
+                    save_csv_data(csv_path, phase + '_acc.txt', [str(epoch)] + class_acc)
 
             time_elapsed = time.time() - start_time
             print('  Time Elapsed {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))

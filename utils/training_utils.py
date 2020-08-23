@@ -144,8 +144,8 @@ def get_fc_channel_classes(data_path):
 
 
 # Save list as CSV
-def save_csv_data(filename, new_line):
-    with open(filename, "a+", newline='') as f:
+def save_csv_data(csv_path, filename, new_line):
+    with open(os.path.join(csv_path, filename), "a+", newline='') as f:
         wr = csv_writer(f, quoting=QUOTE_ALL)
         wr.writerow(new_line)
 
