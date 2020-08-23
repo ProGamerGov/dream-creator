@@ -143,6 +143,7 @@ python train_googlenet.py -data_path <training_data> -balance_classes -batch_siz
 * `-balance_classes`: Enabling this flag will balance training for each class based on class size.
 
 **Model options:**
+* `-model_file`: Path to the `.pth` model file to use for the starting model. Default is the BVLC GoogleNet model.
 * `-freeze_to`: Which layer to freeze the model up to; one of `none`, `conv1`, `conv2`, `conv3`, `mixed3a`, `mixed3b`, `mixed4a`, `mixed4b`, `mixed4c`, `mixed4d`, `mixed4e`, `mixed5a`, or `mixed5b`. Default is `mixed3b`.
 * `-freeze_aux1_to`: Which layer to freeze the first auxiliary branch up to; one of `none`, `loss_conv`, `loss_fc`, or `loss_classifier`. Default is `none`.
 * `-freeze_aux2_to`: Which layer to freeze the second auxiliary branch up to; one of `none`, `loss_conv`, `loss_fc`, or `loss_classifier`. Default is `none`.
@@ -153,6 +154,7 @@ python train_googlenet.py -data_path <training_data> -balance_classes -batch_siz
 * `-output_name`: Name of the output model. Default is `bvlc_out.pth`.
 * `-individual_acc`: Enabling this flag will print the individual accuracy of each class.
 * `-save_csv`: Enabling this flag will save loss and accuracy data to txt files.
+* `-csv_dir`: Where to save csv files. Default is set to current working directory.
 
 **Other options:**
 * `-use_device`: Zero-indexed ID of the GPU to use plus `cuda:`. Default is `cuda:0`.

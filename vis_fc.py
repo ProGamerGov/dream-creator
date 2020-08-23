@@ -56,7 +56,7 @@ def main_func(params):
     except:
         model_epoch = params.model_epoch
 
-    cnn, norm_vals, num_classes = load_model(params.model_file, params.num_classes, has_branches=params.no_branches)
+    cnn, norm_vals, num_classes = load_model(params.model_file, params.num_classes, has_branches=not params.no_branches)
     if norm_vals != None:
         params.data_mean = norm_vals[0]
     else:

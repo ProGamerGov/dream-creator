@@ -50,7 +50,7 @@ def main_func(params):
         torch.backends.cudnn.benchmark = True
         torch.backends.cudnn.enabled = True
 
-    cnn, norm_vals, num_classes = load_model(params.model_file, params.num_classes, has_branches=params.no_branches)
+    cnn, norm_vals, num_classes = load_model(params.model_file, params.num_classes, has_branches=not params.no_branches)
     if norm_vals != None:
         params.data_mean = norm_vals[0]
     else:
