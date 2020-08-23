@@ -154,6 +154,7 @@ python train_googlenet.py -data_path <training_data> -balance_classes -batch_siz
 * `-output_name`: Name of the output model. Default is `bvlc_out.pth`.
 * `-individual_acc`: Enabling this flag will print the individual accuracy of each class.
 * `-save_csv`: Enabling this flag will save loss and accuracy data to txt files.
+* `-csv_dir`: Where to save csv files. Default is set to current working directory.
 
 **Other options:**
 * `-use_device`: Zero-indexed ID of the GPU to use plus `cuda:`. Default is `cuda:0`.
