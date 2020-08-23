@@ -52,6 +52,8 @@ def build_model(model_file='pt_bvlc.pth', mode='bvlc', num_classes=120, load_bra
     base_name = os.path.basename(model_file)
     if base_name.lower() in base_list:
         load_classes, mode = base_list[base_name.lower()]
+        if mode == '5h':
+            load_branches = False
     else:
         load_classes = num_classes
 
