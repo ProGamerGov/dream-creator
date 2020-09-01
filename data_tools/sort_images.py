@@ -70,40 +70,42 @@ def main_func(params):
     print('Sorting images into the following classes:')
     print(' ',class_list)
     ext = [".jpg", ".jpeg", ".png", ".tiff", ".bmp"]
-    for file in os.listdir(params.unsorted_data):
-        if os.path.splitext(file)[1].lower() in ext:
-            test_input = preprocess(os.path.join(params.unsorted_data, file), params.data_mean, params.data_sd).to(params.use_device)
-            output = cnn(test_input)
-            output = output[0] if type(output) == tuple else output
-            index = output.argmax().item()
 
-            if params.confidence_min != -1 or params.confidence_max != -1:
-                sm = torch.nn.Softmax(dim=1)
-                probabilities = sm(output)[0][index]
-                if params.confidence_min != -1 and params.confidence_max != -1:
-                    confident = True if params.confidence_min < probabilities and probabilities < params.confidence_max else False
-
-                elif params.confidence_min != -1:
-                    confident = True if params.confidence_min < probabilities else False
-                elif params.confidence_max != -1:
-                    confident = True if params.confidence_max > probabilities else False
-            else:
-                confident = True
-
-            if index == params.cat and confident or params.cat == -1 and confident:
-                if params.cat != -1 and index == params.cat:
-                    new_path = os.path.join(params.sorted_data, str(params.cat))
+    for current_path, dirs, files in os.walk(params.unsorted_data, topdown=True):
+        for file in files:
+            if os.path.splitext(file)[1].lower() in ext:
+                test_input = preprocess(os.path.join(current_path, file), params.data_mean, params.data_sd).to(params.use_device)
+                output = cnn(test_input)
+                output = output[0] if type(output) == tuple else output
+                index = output.argmax().item()
+    
+                if params.confidence_min != -1 or params.confidence_max != -1:
+                    sm = torch.nn.Softmax(dim=1)
+                    probabilities = sm(output)[0][index]
+                    if params.confidence_min != -1 and params.confidence_max != -1:
+                        confident = True if params.confidence_min < probabilities and probabilities < params.confidence_max else False
+    
+                    elif params.confidence_min != -1:
+                        confident = True if params.confidence_min < probabilities else False
+                    elif params.confidence_max != -1:
+                        confident = True if params.confidence_max > probabilities else False
                 else:
-                    if params.class_strings == '':
-                         new_path = os.path.join(params.sorted_data, str(index))
+                    confident = True
+    
+                if index == params.cat and confident or params.cat == -1 and confident:
+                    if params.cat != -1 and index == params.cat:
+                        new_path = os.path.join(params.sorted_data, str(params.cat))
                     else:
-                         new_path = os.path.join(params.sorted_data, class_strings[index])
-                print(index, file)
-
-                try:
-                    shutil.copy2(os.path.join(os.path.normpath(params.unsorted_data), file), os.path.join(new_path, file))
-                except (OSError, SyntaxError) as oe:
-                    print('Failed:', os.path.join(os.path.normpath(params.unsorted_data), file))
+                        if params.class_strings == '':
+                             new_path = os.path.join(params.sorted_data, str(index))
+                        else:
+                             new_path = os.path.join(params.sorted_data, class_strings[index])
+                    print(index, file)
+    
+                    try:
+                        shutil.copy2(os.path.join(os.path.normpath(current_path), file), os.path.join(new_path, file))
+                    except (OSError, SyntaxError) as oe:
+                        print('Failed:', os.path.join(os.path.normpath(current_path), file))
 
 
 
