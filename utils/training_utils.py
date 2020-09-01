@@ -180,13 +180,22 @@ def setup_model(model_file='pt_bvlc.pth', num_classes=120, base_model='bvlc', pr
 
 # Load checkpoint
 def load_checkpoint(cnn, model_file, optimizer, lrscheduler, num_classes, device='cuda:0', is_start_model=True):
-    start_epoch = 1
+    start_epoch, change_fc = 1, False
 
     checkpoint = torch.load(model_file, map_location='cpu')
     if type(checkpoint) == dict:
         model_keys = list(checkpoint.keys())
 
-        if not is_start_model:
+        try: 
+            load_classes = checkpoint['num_classes']
+            if num_classes != load_classes:
+                is_start_model, change_fc = True, True
+            else:
+                load_classes = num_classes
+        except:
+            load_classes = num_classes
+
+        if not is_start_model or change_fc:
             cnn.replace_fc(num_classes, True)
 
         cnn.load_state_dict(checkpoint['model_state_dict'])
