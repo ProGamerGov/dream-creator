@@ -78,20 +78,20 @@ def main_func(params):
                 output = cnn(test_input)
                 output = output[0] if type(output) == tuple else output
                 index = output.argmax().item()
-    
+
                 if params.confidence_min != -1 or params.confidence_max != -1:
                     sm = torch.nn.Softmax(dim=1)
                     probabilities = sm(output)[0][index]
                     if params.confidence_min != -1 and params.confidence_max != -1:
                         confident = True if params.confidence_min < probabilities and probabilities < params.confidence_max else False
-    
+
                     elif params.confidence_min != -1:
                         confident = True if params.confidence_min < probabilities else False
                     elif params.confidence_max != -1:
                         confident = True if params.confidence_max > probabilities else False
                 else:
                     confident = True
-    
+
                 if index == params.cat and confident or params.cat == -1 and confident:
                     if params.cat != -1 and index == params.cat:
                         new_path = os.path.join(params.sorted_data, str(params.cat))
@@ -101,7 +101,7 @@ def main_func(params):
                         else:
                              new_path = os.path.join(params.sorted_data, class_strings[index])
                     print(index, file)
-    
+
                     try:
                         shutil.copy2(os.path.join(os.path.normpath(current_path), file), os.path.join(new_path, file))
                     except (OSError, SyntaxError) as oe:
