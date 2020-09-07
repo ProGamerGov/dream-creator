@@ -186,17 +186,17 @@ def load_checkpoint(cnn, model_file, optimizer, lrscheduler, num_classes, device
     if type(checkpoint) == dict:
         model_keys = list(checkpoint.keys())
 
-        try: 
+        try:
             load_classes = checkpoint['num_classes']
             if num_classes != load_classes:
-                is_start_model, change_fc = True, True
+                is_start_model, change_fc = True, True # Pretend it's a starting model so FC gets replaced
             else:
                 load_classes = num_classes
         except:
             load_classes = num_classes
 
         if not is_start_model or change_fc:
-            cnn.replace_fc(num_classes, True)
+            cnn.replace_fc(load_classes, True)
 
         cnn.load_state_dict(checkpoint['model_state_dict'])
 
