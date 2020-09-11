@@ -166,7 +166,7 @@ python resize_data.py -csv_file train_acc.txt
 
 ## Image Grid Creator
 
-This script will put images created by `vis_fc.py` into a grid for easy comparisons and analysis
+This script will put images created by `vis_multi.py` into a grid for easy comparisons and analysis
 
 ```
 python make_grid.py -input_path <image_dir>
