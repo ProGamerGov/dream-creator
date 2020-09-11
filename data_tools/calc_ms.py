@@ -9,6 +9,7 @@ def main():
     parser.add_argument("-data_path", help="Path to your dataset", type=str, default='')
     parser.add_argument("-batch_size", type=int, default=10)
     parser.add_argument("-not_caffe", action='store_true')
+    parser.add_argument("-use_rgb", action='store_true')
     params = parser.parse_args()
     main_calc(params)
 
@@ -21,7 +22,10 @@ def main_calc(params):
 
     if not params.not_caffe:
         range_change = transforms.Compose([transforms.Lambda(lambda x: x*255)])
-        transform_list = transform_list + [range_change]
+        transform_list += [range_change]
+        if not params.use_rgb:
+            rgb2bgr = transforms.Compose([transforms.Lambda(lambda x: x[torch.LongTensor([2,1,0])])])
+            transform_list += [rgb2bgr]
 
     dataset = torchvision.datasets.ImageFolder(params.data_path, transform=transforms.Compose(transform_list))
     loader = torch.utils.data.DataLoader(dataset, batch_size=params.batch_size, num_workers=0, shuffle=False)
