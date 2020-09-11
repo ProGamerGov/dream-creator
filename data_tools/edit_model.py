@@ -14,6 +14,7 @@ def main():
     parser.add_argument("-normval_format", choices=['bgr', 'rgb', 'ignore'], default='ignore')
     parser.add_argument("-has_branches", choices=['true', 'false', 'ignore'], default='ignore')
     parser.add_argument("-reverse_normvals", action='store_true')
+    parser.add_argument("-print_vals", action='store_true')
     parser.add_argument("-output_name", type=str, default='')
     params = parser.parse_args()
     main_func(params)
@@ -22,6 +23,9 @@ def main():
 def main_func(params)
     checkpoint = torch.load(params.model_file, map_location='cpu')
     save_model = copy.deepcopy(checkpoint)
+    
+    if params.print_vals:
+        print_model_vals(save_model)
 
     if params.num_classes > -1:
         save_model['num_classes'] = params.num_classes
@@ -62,4 +66,44 @@ def main_func(params)
             norm_vals[1].reverse()
             save_model['normalize_params'] = norm_vals
 
-    torch.save(save_model, save_name)
+    if params.output_name != '':
+        torch.save(save_model, save_name)
+    
+    
+    
+def print_model_vals(model):
+    print('Model Values')
+
+    try:
+        print('  Num classes:', model['num_classes'])
+    except:
+        pass
+    try:
+        print('  Base model:', model['base_model'])
+    except:
+        pass
+    try:
+        print('  Model epoch:', model['epoch'])
+    except:
+        pass
+    try:
+        print('  Has branches:', model['has_branches'])
+    except:
+        pass
+    try:
+        print('  Norm value format', model['normalize_params'][2])
+    except:
+        pass
+    try:
+        print(' Mean values', model['normalize_params'][0])
+    except:
+        pass
+    try:
+        print(' Standard deviation values', model['normalize_params'][1])
+    except:
+        pass
+
+
+
+if __name__ == "__main__":
+    main()
