@@ -55,7 +55,6 @@ def main_func(params):
         params.data_mean = norm_vals[0]
     else:
         params.data_mean = [float(m) for m in params.data_mean.split(',')]
-        params.data_mean.reverse() # RGB to BGR
 
     relu_to_redirected_relu(cnn)
 
