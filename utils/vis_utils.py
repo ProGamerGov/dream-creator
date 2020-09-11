@@ -100,9 +100,9 @@ def load_model(model_file, num_classes=120, has_branches=True, mode='bvlc'):
         if base_name.lower() == 'pt_bvlc.pth' or base_name.lower() == 'pt_places365.pth':
             cnn.use_fc = False
         if base_name.lower() == 'pt_bvlc.pth' or base_name.lower() == 'pt_inception5h.pth':
-            norm_vals = [[103.939,116.779, 123.68],[1,1,1], 'BGR']
+            norm_vals = [[103.939,116.779,123.68], [1,1,1], 'BGR']
         elif base_name.lower() == 'pt_places365.pth':
-            norm_vals = [[104.051,112.514,116.676],[1,1,1], 'BGR']
+            norm_vals = [[104.051,112.514,116.676], [1,1,1], 'BGR']
     return cnn, norm_vals, num_classes
 
 
