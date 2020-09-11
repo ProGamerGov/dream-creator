@@ -1,3 +1,4 @@
+import argparse
 import torch
 import copy
 
@@ -20,7 +21,7 @@ def main():
     main_func(params)
 
 
-def main_func(params)
+def main_func(params):
     checkpoint = torch.load(params.model_file, map_location='cpu')
     save_model = copy.deepcopy(checkpoint)
     
@@ -46,7 +47,7 @@ def main_func(params)
             if params.data_mean != 'ignore':
                 norm_vals[0] = [float(m) for m in params.data_mean.split(',')]
             if params.data_sd != 'ignore':
-                norm_vals[1] = [float(s) for  in params.data_sd.split(',')]
+                norm_vals[1] = [float(s) for s in params.data_sd.split(',')]
             if params.normval_format != 'ignore':
                 try:
                     norm_vals[2] = params.normval_format
@@ -55,9 +56,9 @@ def main_func(params)
             save_model['normalize_params'] = norm_vals
 
         except:
-            assert params.data_mean != 'ignore', \ "'-data_mean' is required"
-            assert params.data_sd != 'ignore', \ "'-data_sd' is required"
-            assert params.normval_format != 'ignore', \ "'-normval_format' is required"
+            assert params.data_mean != 'ignore', "'-data_mean' is required"
+            assert params.data_sd != 'ignore', "'-data_sd' is required"
+            assert params.normval_format != 'ignore', "'-normval_format' is required"
             save_model['normalize_params'] = [params.data_mean, params.data_sd, params.normval_format]
             
         if params.reverse_normvals:
@@ -95,11 +96,21 @@ def print_model_vals(model):
     except:
         pass
     try:
-        print(' Mean values', model['normalize_params'][0])
+        print('  Mean values:', model['normalize_params'][0])
     except:
         pass
     try:
-        print(' Standard deviation values', model['normalize_params'][1])
+        print('  Standard deviation values:', model['normalize_params'][1])
+    except:
+        pass
+    try:
+        test = model['optimizer_state_dict']
+        print('  Contains saved optimizer state')
+    except:
+        pass
+    try:
+        test = model['lrscheduler_state_dict']
+        print('  Contains saved learning rate scheduler state')
     except:
         pass
 
