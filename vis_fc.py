@@ -4,10 +4,11 @@ import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from copy import deepcopy
 
 from utils.training_utils import save_csv_data
 from utils.inceptionv1_caffe import relu_to_redirected_relu
-from utils.vis_utils import simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_hook_batch
+from utils.vis_utils import simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_layer_hook
 
 
 def main():
@@ -28,7 +29,7 @@ def main():
 
     # Optimization options
     parser.add_argument( "-lr", "-learning_rate", type=float, default=1.5)
-    parser.add_argument("-num_iterations", type=int, default=500)
+    parser.add_argument("-num_iterations", type=int, default=250)
     parser.add_argument("-jitter", type=int, default=32)
 
     # Other options
@@ -37,6 +38,11 @@ def main():
     parser.add_argument("-seed", type=int, default=-1)
     parser.add_argument("-no_branches", action='store_true')
     parser.add_argument("-save_csv", action='store_true')
+
+    # Batch 
+    parser.add_argument("-batch_size", type=int, default=10)
+    parser.add_argument("-start_channel", type=int, default=-1)
+    parser.add_argument("-end_channel", type=int, default=-1)
     params = parser.parse_args()
 
     params.image_size = [int(m) for m in params.image_size.split(',')]
@@ -56,12 +62,12 @@ def main_func(params):
     except:
         model_epoch = params.model_epoch
 
-    cnn, norm_vals, num_classes = load_model(params.model_file, params.num_classes, has_branches=not params.no_branches)
+    cnn, norm_vals, _ = load_model(params.model_file, params.num_classes, has_branches=not params.no_branches)
     if norm_vals != None:
         params.data_mean = norm_vals[0]
     else:
         params.data_mean = [float(m) for m in params.data_mean.split(',')]
-        params.data_mean.reverse() # RGB to BGR
+    params.data_mean.reverse() # RGB to BGR
 
     relu_to_redirected_relu(cnn)
 
@@ -77,30 +83,59 @@ def main_func(params):
 
     # Full network
     net = ModelPlus(prep_net, cnn)
-    loss_func = mean_loss
-    loss_modules = register_hook_batch(net.net, params.layer, loss_func=loss_func)
 
+    # Create basic input
     input_tensor = torch.randn(3,224,224).to('cuda:0') * 0.01
+
+    # Determine how many visualizations to generate
+    num_channels, layer_dim = get_num_channels(deepcopy(cnn), params.layer, input_tensor.detach())
+
+    # Loss module setup
+    loss_func = mean_loss
+    loss_modules = register_hook_batch_selective(net.net, params.layer, loss_func=loss_func)
+    loss_modules[0].layer_dim = layer_dim
+
     input_tensor_list = []
-    for t in range(num_classes):
+    for t in range(params.batch_size):
         input_tensor_list.append(input_tensor.clone())
     input_tensor = torch.stack(input_tensor_list)
 
-    print('Visualizing ' + str(num_classes) + ' ' + params.layer + ' channels')
-    print('Running optimization with ADAM')
+    output_basename = os.path.join(params.output_dir, params.layer.replace('/', '_'))
 
-    output_basename = os.path.join(params.output_dir, params.layer)
+    num_channels = num_channels if params.end_channel < 0 else params.end_channel
+    start_val = 0 if params.start_channel < 0 else params.start_channel
+    vis_count = start_val
+   
+    num_channels_vis = len(range(start_val, num_channels)) 
+    num_runs = -(-num_channels_vis // params.batch_size)
 
-    # Create 224x224 image
-    output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.data_mean, \
-                          params.save_iter, params.print_iter, params.not_caffe, model_epoch, output_basename, params.save_csv)
-    for batch in range(output_tensor.size(0)):
-        simple_deprocess(output_tensor[batch], output_basename + '_c' + str(batch).zfill(2) + '_e' + str(model_epoch).zfill(3) + \
-                         '.jpg', params.data_mean, params.not_caffe)
+    print('\nVisualizing ' + str(num_channels) + ' ' + params.layer + ' channels')
+    print('Running optimization with ADAM\n')
+
+    for num_vis in range(num_runs):
+        print('Processing batch number ' + str(num_vis + 1) + '/' + str(num_runs))
+        loss_modules[0].channel_end += params.batch_size
+        if loss_modules[0].channel_end > num_channels - 1:
+            loss_modules[0].channel_end = num_channels
+
+        batch_count = len(range(loss_modules[0].channel_start, loss_modules[0].channel_end))
+        if batch_count < params.batch_size:
+            input_tensor = input_tensor[:batch_count,:,:,:]
+
+        output_tensor = dream(net, input_tensor.clone(), params.num_iterations, params.lr, loss_modules, params.print_iter)
+        for batch_val in range(params.batch_size):
+            simple_deprocess(output_tensor[batch_val], output_basename + '_c' + str(vis_count).zfill(4) + '_e' + str(model_epoch).zfill(3) + \
+                             '.jpg', params.data_mean, params.not_caffe)
+            vis_count += 1
+            if vis_count > num_channels or batch_val == batch_count - 1:
+                break
+
+        loss_modules[0].channel_start += params.batch_size
+        
 
 
 # Function to maximize CNN activations
-def dream(net, img, iterations, lr, loss_modules, m, save_iter, print_iter, use_caffe, epoch, output_basename, should_save_csv):
+def dream(net, img, iterations, lr, loss_modules, print_iter):
     img = nn.Parameter(img)
     optimizer = torch.optim.Adam([img], lr=lr)
 
@@ -112,15 +147,58 @@ def dream(net, img, iterations, lr, loss_modules, m, save_iter, print_iter, use_
         loss.backward()
 
         if print_iter > 0 and i % print_iter == 0:
-            print('Iteration', str(i) + ',', 'Loss', str(loss.item()))
-        if should_save_csv:
-            save_csv_data('e'+ str(epoch).zfill(3) + '_visloss.txt', [str(i+1), str(loss.item())])
+            print('  Iteration', str(i) + ',', 'Loss', str(loss.item()))
 
-        if save_iter > 0 and i > 0 and i % save_iter == 0:
-            for batch in range(img.size(0)):
-                simple_deprocess(img[batch].detach(), output_basename + '_c' + str(batch).zfill(2) + '_e' + str(epoch).zfill(3) + '_' + str(i).zfill(4) + '.jpg', m, use_caffe)
         optimizer.step()
     return img.detach()
+
+
+
+class ChannelRecorder(torch.nn.Module):
+    def forward(self, module, input, output):
+        self.size = list(output.size())
+
+        
+# Determine total number of channels
+def get_num_channels(test_net, layer, test_tensor):
+    get_channels = ChannelRecorder()   
+    channel_catcher = register_layer_hook(test_net, layer, get_channels)    
+    with torch.no_grad():
+        test_net(test_tensor.unsqueeze(0))
+    num_channels = channel_catcher[0].size
+    return num_channels[1], len(num_channels)
+
+
+def register_hook_batch_selective(net, layer_name, loss_func=mean_loss):
+    loss_module = SimpleDreamLossHookChannels(loss_func)
+    return register_layer_hook(net, layer_name, loss_module)
+
+
+# Define a simple forward hook to collect DeepDream loss for multiple channels
+class SimpleDreamLossHookChannels(torch.nn.Module):
+    def __init__(self, loss_func=mean_loss):
+        super(SimpleDreamLossHookChannels, self).__init__()
+        self.get_loss = loss_func
+        self.channel_start = 0
+        self.channel_end = 0
+        self.layer_dim = 2
+        self.get_neuron = False
+
+    def forward(self, module, input, output):
+        output = self.extract_neuron(output) if self.get_neuron == True else output
+        vis_list = list(range(self.channel_start, self.channel_end))
+        loss = 0
+        for i in range(0, len(vis_list)):
+            if self.layer_dim == 2:
+                loss = loss + self.get_loss(output[i, vis_list[i]])
+            elif self.layer_dim == 4:
+                loss = loss + self.get_loss(output[i, vis_list[i], :, :])
+        self.loss = -loss
+
+    def extract_neuron(self, input):
+        x = input.size(2) // 2
+        y = input.size(3) // 2
+        return input[:, :, y:y+1, x:x+1]
 
 
 
