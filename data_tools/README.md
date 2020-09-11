@@ -142,7 +142,8 @@ python edit_model.py -model_file <bvlc_out120>.pth -base_model bvlc -num_classes
 * `-base_model`: The base model used to create your model; one of `bvlc`, `p365`, `5h`, `ignore`. Default is `ignore`.
 * `-num_classes`: Set the number of model classes. Default is set to `-1` to ignore.
 * `-model_epoch`: Set the model epoch. Default is set to `-1` to ignore.
-* `-reverse_normvals`: If this flag is enabled, mean and standard deviation values added to the model and stored in the model will be reversed. In essence BGR values are converted to RGB and vice versa.  
+* `-reverse_normvals`: If this flag is enabled, mean and standard deviation values added to the model and stored in the model will be reversed. In essence BGR values are converted to RGB and vice versa.
+* `-print_vals`: If this flag is enabled, all model values from the loaded model will be printed.
 
 ---
 
