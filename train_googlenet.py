@@ -147,7 +147,7 @@ def main_func(params):
         torch.backends.cudnn.enabled = True
 
 
-    save_info = [[params.data_mean, params.data_sd], num_classes, has_branches, base_model]
+    save_info = [[params.data_mean, params.data_sd, 'RGB'], num_classes, has_branches, base_model]
 
     # Train model
     train_model(model=cnn, dataloaders=training_data, criterion=criterion, optimizer=optimizer, lrscheduler=lrscheduler, \
