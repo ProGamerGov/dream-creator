@@ -5,7 +5,6 @@ import copy
 
 def main():
     parser = argparse.ArgumentParser()
-
     parser.add_argument("-model_file", type=str, default='')
     parser.add_argument("-num_classes", type=int, default=-1)
     parser.add_argument("-epoch", type=int, default=-1)
