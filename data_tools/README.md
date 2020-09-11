@@ -124,6 +124,25 @@ python strip_model.py -model_file <bvlc_out120>.pth -output_name stripped_models
 
 * `-delete_branches`: If this flag is enabled, any auxiliary branches in the model will be removed.
 
+
+## Add/Change Model Values
+
+If need to add or change any of the model values then use this script. Any options left as `ignore` or `-1` will not be added/changed. This script can be useful for fixing bugs, adding new models, and adding missing values. 
+
+```
+python edit_model.py -model_file <bvlc_out120>.pth -base_model bvlc -num_classes 10 -output_name edited_model.pth
+```
+
+* `-model_file`: Path to your pretrained GoogleNet model file.
+* `-output_name`: What name to save the edited model as.
+* `-data_mean`: Your precalculated list of mean values that was used to train the model. Default is `ignore`.
+* `-data_sd`: Your precalculated list of standard deviation values that was used to train the model. Default is `ignore`.
+* `-normval_format`: The format of your mean and standard deviation values; one of `bgr`, `rgb`, `ignore`. Default is `ignore`.
+* `-has_branches`: Whether or not the model has branches; one of `true`, `false`, `ignore`. Default is `ignore`.
+* `-base_model`: The base model used to create your model; one of `bvlc`, `p365`, `5h`, `ignore`. Default is `ignore`.
+* `-num_classes`: Set the number of model classes. Default is set to `-1` to ignore.
+* `-model_epoch`: Set the model epoch. Default is set to `-1` to ignore.
+
 ---
 
 # Comparison of Results
