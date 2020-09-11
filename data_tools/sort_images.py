@@ -44,9 +44,7 @@ def main_func(params):
         params.data_sd = norm_vals[1]
     else:
         params.data_mean = [float(m) for m in params.data_mean.split(',')]
-        params.data_mean.reverse() # RGB to BGR
         params.data_sd = [float(m) for m in params.data_sd.split(',')]
-        params.data_sd.reverse() # RGB to BGR
 
     cnn = cnn.to(params.use_device).eval()
     for param in cnn.parameters():
