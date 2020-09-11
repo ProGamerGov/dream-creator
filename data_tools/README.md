@@ -134,7 +134,7 @@ python edit_model.py -model_file <bvlc_out120>.pth -base_model bvlc -num_classes
 ```
 
 * `-model_file`: Path to your pretrained GoogleNet model file.
-* `-output_name`: What name to save the edited model as.
+* `-output_name`: What name to save the edited model as. If left blank, no output model will be saved.
 * `-data_mean`: Your precalculated list of mean values that was used to train the model. Default is `ignore`.
 * `-data_sd`: Your precalculated list of standard deviation values that was used to train the model. Default is `ignore`.
 * `-normval_format`: The format of your mean and standard deviation values; one of `bgr`, `rgb`, `ignore`. Default is `ignore`.
