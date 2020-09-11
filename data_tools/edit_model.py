@@ -13,6 +13,7 @@ def main():
     parser.add_argument("-data_sd", type=str, default='ignore')
     parser.add_argument("-normval_format", choices=['bgr', 'rgb', 'ignore'], default='ignore')
     parser.add_argument("-has_branches", choices=['true', 'false', 'ignore'], default='ignore')
+    parser.add_argument("-reverse_normvals", action='store_true')
     parser.add_argument("-output_name", type=str, default='')
     params = parser.parse_args()
     main_func(params)
@@ -41,14 +42,24 @@ def main_func(params)
             if params.data_mean != 'ignore':
                 norm_vals[0] = [float(m) for m in params.data_mean.split(',')]
             if params.data_sd != 'ignore':
-                norm_vals[1] = [float(m) for m in params.data_sd.split(',')]
+                norm_vals[1] = [float(s) for  in params.data_sd.split(',')]
             if params.normval_format != 'ignore':
-                norm_vals[2] = params.normval_format
+                try:
+                    norm_vals[2] = params.normval_format
+                except:
+                    norm_vals += [params.normval_format] # Add to legacy models
             save_model['normalize_params'] = norm_vals
+
         except:
             assert params.data_mean != 'ignore', \ "'-data_mean' is required"
             assert params.data_sd != 'ignore', \ "'-data_sd' is required"
             assert params.normval_format != 'ignore', \ "'-normval_format' is required"
             save_model['normalize_params'] = [params.data_mean, params.data_sd, params.normval_format]
+            
+        if params.reverse_normvals:
+            norm_vals = save_model['normalize_params']
+            norm_vals[0].reverse()
+            norm_vals[1].reverse()
+            save_model['normalize_params'] = norm_vals
 
     torch.save(save_model, save_name)
