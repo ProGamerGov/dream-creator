@@ -181,7 +181,7 @@ After training a new DeepDream model, you'll need to test it's visualizations. T
 * `-jitter`: The amount of image jitter to use for preprocessing. Default is `32`.
 
 **Processing options:**
-* `-batch_size`: How many visualization images to create in each batch. Default is `10`.
+* `-batch_size`: How many channel visualization images to create in each batch. Default is `10`.
 * `-start_channel`: What channel to start creating visualization images at. Default is `0`.
 * `-end_channel`: What channel to stop creating visualization images at. Default is set to `-1` for all channels.
 
