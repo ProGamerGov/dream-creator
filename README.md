@@ -176,7 +176,7 @@ After training a new DeepDream model, you'll need to test it's visualizations. T
 * `-learning_rate`: Learning rate to use with the ADAM or L-BFGS optimizer. Default is `1.5`.
 * `-optimizer`: The optimization algorithm to use; either `lbfgs` or `adam`; default is `adam`.
 * `-num_iterations`: Default is `500`.
-* `-layer`: The specific layer you wish to use. Default is set to `mixed5a`.
+* `-layer`: The specific layer you wish to use. Default is set to `fc`.
 * `-image_size`: A comma separated list of `<height>,<width>` to use for the output image. Default is set to `224,224`.
 * `-jitter`: The amount of image jitter to use for preprocessing. Default is `32`.
 
