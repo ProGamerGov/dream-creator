@@ -169,7 +169,7 @@ python train_googlenet.py -data_path <training_data> -balance_classes -batch_siz
 
 ## Visualizing GoogleNet FC Layer Results
 
-After training a new DeepDream model, you'll need to test it's visualizations. The best visualizations are found in the main FC layer also known as the 'logits' layer. This script helps you quickly and easily visualize all channels in a particular model for a particular model epoch, by generating a separate image for each channel.
+After training a new DeepDream model, you'll need to test it's visualizations. The best visualizations are found in the main FC layer also known as the 'logits' layer. This script helps you quickly and easily visualize all of a specified layer's channels in a particular model for a particular model epoch, by generating a separate image for each channel.
 
 **Input options:**
 * `-model_file`: Path to the pretrained GoogleNet model that you wish to use.
