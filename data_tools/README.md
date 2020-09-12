@@ -129,14 +129,14 @@ python strip_model.py -model_file <bvlc_out120>.pth -output_name stripped_models
 
 ## Add/Change Model Values
 
-If need to add or change any of the model values then use this script. Any options left as `ignore` or `-1` will not be added/changed. This script can be useful for fixing bugs, adding new models, and adding missing values. 
+If need to add or change any of the stored model values then use this script. Any options left as `ignore` or `-1` will not be added/changed. This script can be useful for fixing bugs, adding new models, and adding missing values. 
 
 ```
 python edit_model.py -model_file <bvlc_out120>.pth -base_model bvlc -num_classes 10 -output_name edited_model.pth
 ```
 
 * `-model_file`: Path to your pretrained GoogleNet model file.
-* `-output_name`: What name to save the edited model as. If left blank, no output model will be saved.
+* `-output_name`: Name of the output model. If left blank, no output model will be saved.
 * `-data_mean`: Your precalculated list of mean values that was used to train the model. Default is `ignore`.
 * `-data_sd`: Your precalculated list of standard deviation values that was used to train the model. Default is `ignore`.
 * `-normval_format`: The format of your mean and standard deviation values; one of `bgr`, `rgb`, `ignore`. Default is `ignore`.
@@ -145,7 +145,7 @@ python edit_model.py -model_file <bvlc_out120>.pth -base_model bvlc -num_classes
 * `-num_classes`: Set the number of model classes. Default is set to `-1` to ignore.
 * `-model_epoch`: Set the model epoch. Default is set to `-1` to ignore.
 * `-reverse_normvals`: If this flag is enabled, mean and standard deviation values added to the model and stored in the model will be reversed. In essence BGR values are converted to RGB and vice versa.
-* `-print_vals`: If this flag is enabled, all model values from the loaded model will be printed.
+* `-print_vals`: If this flag is enabled, all stored model values from the loaded model will be printed.
 
 ---
 
