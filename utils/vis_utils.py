@@ -103,6 +103,7 @@ def load_model(model_file, num_classes=120, has_branches=True, mode='bvlc'):
             norm_vals = [[103.939,116.779,123.68], [1,1,1], 'BGR']
         elif base_name.lower() == 'pt_places365.pth':
             norm_vals = [[104.051,112.514,116.676], [1,1,1], 'BGR']
+        cnn.load_state_dict(checkpoint) 
     return cnn, norm_vals, num_classes
 
 
