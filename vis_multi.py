@@ -6,7 +6,6 @@ import torch.nn as nn
 import torch.optim as optim
 from copy import deepcopy
 
-from utils.training_utils import save_csv_data
 from utils.inceptionv1_caffe import relu_to_redirected_relu
 from utils.vis_utils import simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_layer_hook
 
