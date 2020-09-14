@@ -70,7 +70,6 @@ def main_func(params):
         torch.save(save_model, save_name)
     
     
-    
 def print_model_vals(model):
     print('Model Values')
 
