@@ -54,7 +54,8 @@ def load_dataset(data_path='test_data', val_percent=0.2, batch_size=1, input_siz
         lengths = split_percent(len(full_dataset), val_percent)
         t_data, v_data = torch.utils.data.random_split(full_dataset, lengths)
     else:
-        t_data, v_data = torch.utils.data.Subset(copy.deepcopy(full_dataset), [0,len(full_dataset)]), torch.utils.data.Subset(copy.deepcopy(full_dataset), [0,len(full_dataset)])
+        t_data, v_data = torch.utils.data.Subset(copy.deepcopy(full_dataset), range(0, len(full_dataset))), \
+                         torch.utils.data.Subset(copy.deepcopy(full_dataset), range(0, len(full_dataset)))
 
     # Use separate transforms for training and validation data
     t_data = copy.deepcopy(t_data)
