@@ -28,7 +28,7 @@ def main():
 
     # Optimization options
     parser.add_argument( "-lr", "-learning_rate", type=float, default=1.5)
-    parser.add_argument("-num_iterations", type=int, default=250)
+    parser.add_argument("-num_iterations", type=int, default=500)
     parser.add_argument("-jitter", type=int, default=32)
 
     # Other options
