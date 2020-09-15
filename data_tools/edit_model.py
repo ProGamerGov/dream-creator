@@ -23,23 +23,23 @@ def main():
 def main_func(params):
     checkpoint = torch.load(params.model_file, map_location='cpu')
     save_model = copy.deepcopy(checkpoint)
-    
+
     if params.print_vals:
         print_model_vals(save_model)
 
     if params.num_classes > -1:
         save_model['num_classes'] = params.num_classes
-        
+
     if params.base_model != 'ignore':
         save_model['base_model'] = params.base_model
-        
+
     if params.has_branches != 'ignore':
         has_branches = True if params.has_branches == 'true' else False
         save_model['has_branches'] = has_branches
 
     if params.epoch != -1:
         save_model['epoch'] = params.epoch
-        
+
     if params.data_mean != 'ignore' or params.data_sd != 'ignore' or params.normval_format != 'ignore':
         try:
             norm_vals = save_model['normalize_params']
@@ -59,7 +59,7 @@ def main_func(params):
             assert params.data_sd != 'ignore', "'-data_sd' is required"
             assert params.normval_format != 'ignore', "'-normval_format' is required"
             save_model['normalize_params'] = [params.data_mean, params.data_sd, params.normval_format]
-            
+
         if params.reverse_normvals:
             norm_vals = save_model['normalize_params']
             norm_vals[0].reverse()
@@ -68,8 +68,8 @@ def main_func(params):
 
     if params.output_name != '':
         torch.save(save_model, save_name)
-    
-    
+
+
 def print_model_vals(model):
     print('Model Values')
 

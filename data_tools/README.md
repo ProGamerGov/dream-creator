@@ -22,7 +22,7 @@ All of these scripts with the exception of `sort_images.py` can be copied to and
 2. [Model Tools]()
 
    1. [Reduce Model Size](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#reduce-model-size)
-   
+
    2. [Add/Change Model Values](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#addchange-model-values)
 
 3. [Visualization & Training Tools]()
@@ -130,7 +130,7 @@ python strip_model.py -model_file <bvlc_out120>.pth -output_name stripped_models
 
 ## Add/Change Model Values
 
-If need to add or change any of the stored model values then use this script. Any options left as `ignore` or `-1` will not be added/changed. This script can be useful for fixing bugs, adding new models, and adding missing values. 
+If need to add or change any of the stored model values then use this script. Any options left as `ignore` or `-1` will not be added/changed. This script can be useful for fixing bugs, adding new models, and adding missing values.
 
 ```
 python edit_model.py -model_file <bvlc_out120>.pth -base_model bvlc -num_classes 10 -output_name edited_model.pth
