@@ -62,7 +62,7 @@ def main_func(params):
         model_epoch = params.model_epoch
 
     cnn, norm_vals, _ = load_model(params.model_file, params.num_classes, has_branches=not params.no_branches)
-    if norm_vals != None:
+    if norm_vals != None and params.data_mean == '':
         params.data_mean = norm_vals[0]
     else:
         params.data_mean = [float(m) for m in params.data_mean.split(',')]
