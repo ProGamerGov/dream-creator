@@ -38,7 +38,7 @@ def main():
     parser.add_argument("-no_branches", action='store_true')
     parser.add_argument("-save_csv", action='store_true')
 
-    # Batch 
+    # Batch
     parser.add_argument("-batch_size", type=int, default=10)
     parser.add_argument("-start_channel", type=int, default=-1)
     parser.add_argument("-end_channel", type=int, default=-1)
@@ -103,8 +103,8 @@ def main_func(params):
     num_channels = num_channels if params.end_channel < 0 else params.end_channel
     start_val = 0 if params.start_channel < 0 else params.start_channel
     vis_count = start_val
-   
-    num_channels_vis = len(range(start_val, num_channels)) 
+
+    num_channels_vis = len(range(start_val, num_channels))
     num_runs = -(-num_channels_vis // params.batch_size)
 
     print('\nVisualizing ' + str(num_channels) + ' ' + params.layer + ' channels')
@@ -129,7 +129,7 @@ def main_func(params):
                 break
 
         loss_modules[0].channel_start += params.batch_size
-        
+
 
 
 # Function to maximize CNN activations
@@ -156,11 +156,11 @@ class ChannelRecorder(torch.nn.Module):
     def forward(self, module, input, output):
         self.size = list(output.size())
 
-        
+
 # Determine total number of channels
 def get_num_channels(test_net, layer, test_tensor):
-    get_channels = ChannelRecorder()   
-    channel_catcher = register_layer_hook(test_net, layer, get_channels)    
+    get_channels = ChannelRecorder()
+    channel_catcher = register_layer_hook(test_net, layer, get_channels)
     with torch.no_grad():
         test_net(test_tensor.unsqueeze(0))
     num_channels = channel_catcher[0].size
