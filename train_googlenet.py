@@ -58,7 +58,7 @@ def main_func(params):
 
     if params.seed > -1:
         set_seed(params.seed)
-    rnd_generator = torch.Generator(device=params.use_device) if params.seed > -1 else None
+    rnd_generator = torch.Generator(device='cpu') if params.seed > -1 else None
 
     # Setup image training data
     training_data, num_classes, class_weights = load_dataset(data_path=params.data_path, val_percent=params.val_percent, batch_size=params.batch_size, \
