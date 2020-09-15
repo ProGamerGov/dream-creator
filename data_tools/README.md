@@ -23,6 +23,8 @@ All of these scripts with the exception of `sort_images.py` can be copied to and
 
    1. [Reduce Model Size](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#reduce-model-size)
 
+   2. [Add/Change Model Values](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#addchange-model-values)
+
 3. [Visualization & Training Tools]()
 
    1. [Graph Training Data](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#graph-training-data)
@@ -43,6 +45,7 @@ python calc_ms.py -data_path <training_data>
 
 * `-not_caffe`: Enabling this flag will result in the mean and standard deviation output having a range of 0-1 instead of 0-255.
 
+* `-use_rgb`: Enabling this flag will result in output values being in RGB format instead of BGR.
 
 ## FC Channel Contents
 
@@ -74,7 +77,7 @@ This script will try to automatically detect corrupt images that interfere with 
 python find_bad.py -data_path <training_data>
 ```
 
- * `-delete_bad`: Enabling this flag will result in corrupt images being deleted automatically from the specified dataset.
+* `-delete_bad`: Enabling this flag will result in corrupt images being deleted automatically from the specified dataset.
 
 
 ## Image Extractor
@@ -124,6 +127,27 @@ python strip_model.py -model_file <bvlc_out120>.pth -output_name stripped_models
 
 * `-delete_branches`: If this flag is enabled, any auxiliary branches in the model will be removed.
 
+
+## Add/Change Model Values
+
+If need to add or change any of the stored model values then use this script. Any options left as `ignore` or `-1` will not be added/changed. This script can be useful for fixing bugs, adding new models, and adding missing values.
+
+```
+python edit_model.py -model_file <bvlc_out120>.pth -base_model bvlc -num_classes 10 -output_name edited_model.pth
+```
+
+* `-model_file`: Path to your pretrained GoogleNet model file.
+* `-output_name`: Name of the output model. If left blank, no output model will be saved.
+* `-data_mean`: Your precalculated list of mean values that was used to train the model. Default is `ignore`.
+* `-data_sd`: Your precalculated list of standard deviation values that was used to train the model. Default is `ignore`.
+* `-normval_format`: The format of your mean and standard deviation values; one of `bgr`, `rgb`, `ignore`. Default is `ignore`.
+* `-has_branches`: Whether or not the model has branches; one of `true`, `false`, `ignore`. Default is `ignore`.
+* `-base_model`: The base model used to create your model; one of `bvlc`, `p365`, `5h`, `ignore`. Default is `ignore`.
+* `-num_classes`: Set the number of model classes. Default is set to `-1` to ignore.
+* `-model_epoch`: Set the model epoch. Default is set to `-1` to ignore.
+* `-reverse_normvals`: If this flag is enabled, mean and standard deviation values added to the model and stored in the model will be reversed. In essence BGR values are converted to RGB and vice versa.
+* `-print_vals`: If this flag is enabled, all stored model values from the loaded model will be printed.
+
 ---
 
 # Comparison of Results
@@ -145,7 +169,7 @@ python resize_data.py -csv_file train_acc.txt
 
 ## Image Grid Creator
 
-This script will put images created by `vis_fc.py` into a grid for easy comparisons and analysis
+This script will put images created by `vis_multi.py` into a grid for easy comparisons and analysis
 
 ```
 python make_grid.py -input_path <image_dir>

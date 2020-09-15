@@ -213,10 +213,10 @@ val Loss: 0.6986 Acc: 0.5125
 After training has finished, we can now visualize the newly created DeepDream model's FC layers using the following command:
 
 ```
-python vis_fc.py -model_file bvlc_out010.pth -model_epoch 10 -num_iterations 200
+python vis_multi.py -model_file bvlc_out010.pth -num_iterations 200
 ```
 
-The `vis_fc.py` script should end up creating two output images, where one image has more circlelike features and the other has more squarelike features. Using more complex datasets that have more classes and images will yield far better looking results. You can find a list of image collection tools, possible sources of images, and duplicate image detection tools on the [dream-creator wiki](https://github.com/ProGamerGov/dream-creator/wiki).
+The `vis_multi.py` script should end up creating two output images, where one image has more circlelike features and the other has more squarelike features. Using more complex datasets that have more classes and images will yield far better looking results. You can find a list of image collection tools, possible sources of images, and duplicate image detection tools on the [dream-creator wiki](https://github.com/ProGamerGov/dream-creator/wiki).
 
 Finally, to visualize a single layer and channel or to DeepDream your own image, we can use the following command:
 

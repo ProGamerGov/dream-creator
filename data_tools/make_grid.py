@@ -32,7 +32,7 @@ def main_test(params):
     if params.epoch != -1:
          image_list = filter_images(image_list, 'e' + str(params.epoch).zfill(3))
     if params.channel != -1:
-         image_list = filter_images(image_list, 'c' + str(params.channel).zfill(2))
+         image_list = filter_images(image_list, 'c' + str(params.channel).zfill(4))
 
     if not params.disable_natsort:
         image_list.sort(key=n_keys)

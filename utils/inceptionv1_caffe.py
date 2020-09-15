@@ -69,6 +69,7 @@ class InceptionV1_Caffe(nn.Module):
         super(InceptionV1_Caffe, self).__init__()
         self.mode = mode
         self.use_branches = load_branches
+        self.use_fc = True
 
         if self.mode == 'p365' or self.mode == 'bvlc':
             lrn_vals = (5, 9.999999747378752e-05, 0.75, 1)
@@ -183,7 +184,8 @@ class InceptionV1_Caffe(nn.Module):
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
         x = self.drop(x)
-        x = self.fc(x)
+        if self.use_fc:
+            x = self.fc(x)
 
         if not self.use_branches:
             return x

@@ -19,7 +19,7 @@ def split_percent(n, pctg=0.2):
 # Create training and validation images from single set of images
 def load_dataset(data_path='test_data', val_percent=0.2, batch_size=1, input_size=(224,224), \
                        input_mean=[0.485, 0.456, 0.406], input_sd=[0.229, 0.224, 0.225], use_caffe=False, \
-                       train_workers=25, val_workers=5, balance_weights=False):
+                       train_workers=25, val_workers=5, balance_weights=False, rnd_generator=None):
 
     num_classes = sum(os.path.isdir(os.path.join(data_path, i)) for i in os.listdir(data_path))
 
@@ -52,9 +52,13 @@ def load_dataset(data_path='test_data', val_percent=0.2, batch_size=1, input_siz
     get_fc_channel_classes(data_path)
     if val_percent > 0:
         lengths = split_percent(len(full_dataset), val_percent)
-        t_data, v_data = torch.utils.data.random_split(full_dataset, lengths)
+        if rnd_generator == None:
+            t_data, v_data = torch.utils.data.random_split(full_dataset, lengths)
+        else:
+            t_data, v_data = torch.utils.data.random_split(full_dataset, lengths, generator=rnd_generator)
     else:
-        t_data, v_data = copy.deepcopy(full_dataset), copy.deepcopy(full_dataset)
+        t_data, v_data = torch.utils.data.Subset(copy.deepcopy(full_dataset), range(0, len(full_dataset))), \
+                         torch.utils.data.Subset(copy.deepcopy(full_dataset), range(0, len(full_dataset)))
 
     # Use separate transforms for training and validation data
     t_data = copy.deepcopy(t_data)
@@ -66,21 +70,23 @@ def load_dataset(data_path='test_data', val_percent=0.2, batch_size=1, input_siz
         batch_size=batch_size,
         num_workers=train_workers,
         shuffle=True,
+        generator=rnd_generator,
     )
     val_loader = torch.utils.data.DataLoader(
         v_data,
         batch_size=batch_size,
         num_workers=val_workers,
         shuffle=True,
+        generator=rnd_generator,
     )
 
     if balance_weights:
         train_class_counts = count_classes(train_loader.dataset)
         train_weights = [1 / train_class_counts[class_id] for class_id in range(num_classes)]
         train_weights = torch.FloatTensor(train_weights)
-        return {'train': train_loader, 'val': val_loader}, num_classes, train_weights
     else:
-        return {'train': train_loader, 'val': val_loader}, num_classes
+        train_weights = None
+    return {'train': train_loader, 'val': val_loader}, num_classes, train_weights
 
 
 # Get the number of images in each class in a dataset

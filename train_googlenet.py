@@ -58,16 +58,13 @@ def main_func(params):
 
     if params.seed > -1:
         set_seed(params.seed)
+    rnd_generator = torch.Generator(device='cpu') if params.seed > -1 else None
 
     # Setup image training data
-    if params.balance_classes:
-        training_data, num_classes, class_weights = load_dataset(data_path=params.data_path, val_percent=params.val_percent, batch_size=params.batch_size, \
-                                                    input_mean=params.data_mean, input_sd=params.data_sd, use_caffe=not params.not_caffe, \
-                                                    train_workers=params.train_workers, val_workers=params.val_workers, balance_weights=params.balance_classes)
-    else:
-        training_data, num_classes = load_dataset(data_path=params.data_path, val_percent=params.val_percent, batch_size=params.batch_size, \
-                                                    input_mean=params.data_mean, input_sd=params.data_sd, use_caffe=not params.not_caffe, \
-                                                    train_workers=params.train_workers, val_workers=params.val_workers, balance_weights=False)
+    training_data, num_classes, class_weights = load_dataset(data_path=params.data_path, val_percent=params.val_percent, batch_size=params.batch_size, \
+                                                             input_mean=params.data_mean, input_sd=params.data_sd, use_caffe=not params.not_caffe, \
+                                                             train_workers=params.train_workers, val_workers=params.val_workers, balance_weights=params.balance_classes, \
+                                                             rnd_generator=rnd_generator)
 
 
     # Setup model definition
@@ -147,7 +144,7 @@ def main_func(params):
         torch.backends.cudnn.enabled = True
 
 
-    save_info = [[params.data_mean, params.data_sd], num_classes, has_branches, base_model]
+    save_info = [[params.data_mean, params.data_sd, 'BGR'], num_classes, has_branches, base_model]
 
     # Train model
     train_model(model=cnn, dataloaders=training_data, criterion=criterion, optimizer=optimizer, lrscheduler=lrscheduler, \
