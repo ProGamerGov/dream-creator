@@ -84,9 +84,9 @@ def load_dataset(data_path='test_data', val_percent=0.2, batch_size=1, input_siz
         train_class_counts = count_classes(train_loader.dataset)
         train_weights = [1 / train_class_counts[class_id] for class_id in range(num_classes)]
         train_weights = torch.FloatTensor(train_weights)
-        return {'train': train_loader, 'val': val_loader}, num_classes, train_weights
     else:
-        return {'train': train_loader, 'val': val_loader}, num_classes
+        train_weights = None
+    return {'train': train_loader, 'val': val_loader}, num_classes, train_weights
 
 
 # Get the number of images in each class in a dataset
