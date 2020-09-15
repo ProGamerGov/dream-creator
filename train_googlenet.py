@@ -58,16 +58,13 @@ def main_func(params):
 
     if params.seed > -1:
         set_seed(params.seed)
+    rnd_generator = torch.Generator(device=params.use_device) if params.seed > -1 else None
 
     # Setup image training data
-    if params.balance_classes:
-        training_data, num_classes, class_weights = load_dataset(data_path=params.data_path, val_percent=params.val_percent, batch_size=params.batch_size, \
-                                                    input_mean=params.data_mean, input_sd=params.data_sd, use_caffe=not params.not_caffe, \
-                                                    train_workers=params.train_workers, val_workers=params.val_workers, balance_weights=params.balance_classes)
-    else:
-        training_data, num_classes = load_dataset(data_path=params.data_path, val_percent=params.val_percent, batch_size=params.batch_size, \
-                                                    input_mean=params.data_mean, input_sd=params.data_sd, use_caffe=not params.not_caffe, \
-                                                    train_workers=params.train_workers, val_workers=params.val_workers, balance_weights=False)
+    training_data, num_classes, class_weights = load_dataset(data_path=params.data_path, val_percent=params.val_percent, batch_size=params.batch_size, \
+                                                             input_mean=params.data_mean, input_sd=params.data_sd, use_caffe=not params.not_caffe, \
+                                                             train_workers=params.train_workers, val_workers=params.val_workers, balance_weights=params.balance_classes, \
+                                                             rnd_generator=rnd_generator)
 
 
     # Setup model definition
