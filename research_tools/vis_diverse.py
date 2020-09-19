@@ -42,6 +42,7 @@ def main():
     # Batch
     parser.add_argument("-batch_size", type=int, default=4)
     parser.add_argument("-channel", type=int, default=0)
+    parser.add_argument("-similarity_penalty", type=float, default=1e2)
     params = parser.parse_args()
 
     params.image_size = [int(m) for m in params.image_size.split(',')]
@@ -87,7 +88,7 @@ def main_func(params):
 
     # Loss module setup
     loss_func = mean_loss
-    loss_modules = register_hook_batch_selective(net=net.net, layer_name=params.layer, loss_func=loss_func, channel=params.channel)
+    loss_modules = register_hook_batch_selective(net=net.net, layer_name=params.layer, loss_func=loss_func, channel=params.channel, penalty_strength=similarity_penalty)
 
     input_tensor_list = []
     for t in range(params.batch_size):
@@ -126,24 +127,25 @@ def dream(net, img, iterations, lr, loss_modules, print_iter):
     return img.detach()
 
 
-def register_hook_batch_selective(net, layer_name, loss_func=mean_loss, channel=0):
-    loss_module = SimpleDreamLossHookChannels(loss_func, channel)
+def register_hook_batch_selective(net, layer_name, loss_func=mean_loss, channel=0, penalty_strength=1e2):
+    loss_module = SimpleDreamLossHookChannels(loss_func, channel, penalty_strength)
     return register_layer_hook(net, layer_name, loss_module)
 
 
 # Define a simple forward hook to collect DeepDream loss for multiple channels
 class SimpleDreamLossHookChannels(torch.nn.Module):
-    def __init__(self, loss_func=mean_loss, channel=0):
+    def __init__(self, loss_func=mean_loss, channel=0, penalty_strength=1e2):
         super(SimpleDreamLossHookChannels, self).__init__()
         self.get_loss = loss_func
         self.get_neuron = False
         self.channel = channel
+        self.penalty_strength = penalty_strength
 
     def forward(self, module, input, output):
         output = self.extract_neuron(output) if self.get_neuron == True else output
         loss = 0
         loss = -self.get_loss(output[:,self.channel])
-        self.loss = loss - (1e2* diversity(output))
+        self.loss = loss - (self.penalty_strength * diversity(output))
 
     def extract_neuron(self, input):
         x = input.size(2) // 2
