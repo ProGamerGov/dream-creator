@@ -33,8 +33,20 @@ Some channels are polysemantic, meaning they contain multiple different features
 * `-use_device`: Zero-indexed ID of the GPU to use plus `cuda:`. Default is `cuda:0`.
 * `-seed`: An integer value that you can specify for repeatable results. By default this value is random for each run.
 
-Basic visualization:
+Basic usage:
 
 ```
 python vis_diverse.py -model_file <bvlc_out120>.pth -layer fc -channel 5
+```
+
+
+
+## Detecting Activation Strength
+
+This script lets you see what the strongest, weakest, or most average channels are for specified layers.
+
+Basic usage:
+
+```
+python vis_activ.py -model_file <bvlc_out120>.pth -layer mixed5a/conv_5x5_relu -channels 5 -content_image <test_image>.jpg
 ```
