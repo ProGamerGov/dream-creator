@@ -46,7 +46,6 @@ def main():
     parser.add_argument("-freeze_aux1_to", choices=['none', 'loss_conv', 'loss_fc', 'loss_classifier'], default='none')
     parser.add_argument("-freeze_aux2_to", choices=['none', 'loss_conv', 'loss_fc', 'loss_classifier'], default='none')
     parser.add_argument("-freeze_to", choices=['none', 'conv1', 'conv2', 'conv3', 'mixed3a', 'mixed3b', 'mixed4a', 'mixed4b', 'mixed4c', 'mixed4d', 'mixed4e', 'mixed5a', 'mixed5b'], default='mixed3b')
-    parser.add_argument("-toggle_layers", type=str, default='none')
     params = parser.parse_args()
     main_func(params)
 
@@ -133,17 +132,6 @@ def main_func(params):
             for param in getattr(getattr(cnn, 'aux2'), layer).parameters():
                 param.requires_grad = False
 
-       # Optionally freeze/unfreeze specific layers and sub layers
-    if params.toggle_layers != 'none':
-        toggle_layers = [l.replace('\\', '/').replace('.', '/').split('/') for l in params.toggle_layers.split(',')]
-        for layer in toggle_layers:
-            print(layer)
-            if len(layer) == 2:
-                for param in getattr(getattr(cnn, layer[0]), layer[1]).parameters():
-                    param.requires_grad = False if param.requires_grad == True else False
-            else:
-                for param in getattr(cnn, layer[0]).parameters():
-                    param.requires_grad = False if param.requires_grad == True else False
 
     n_learnable_params = sum(param.numel() for param in cnn.parameters() if param.requires_grad)
     print('Model has ' + "{:,}".format(n_learnable_params) + ' learnable parameters\n')

@@ -28,7 +28,7 @@ def main():
 
     # Optimization options
     parser.add_argument( "-lr", "-learning_rate", type=float, default=1.5)
-    parser.add_argument("-num_iterations", type=int, default=500)
+    parser.add_argument("-num_iterations", type=int, default=250)
     parser.add_argument("-jitter", type=int, default=32)
 
     # Other options
@@ -62,7 +62,7 @@ def main_func(params):
         model_epoch = params.model_epoch
 
     cnn, norm_vals, _ = load_model(params.model_file, params.num_classes, has_branches=not params.no_branches)
-    if norm_vals != None and params.data_mean == '':
+    if norm_vals != None:
         params.data_mean = norm_vals[0]
     else:
         params.data_mean = [float(m) for m in params.data_mean.split(',')]
