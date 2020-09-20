@@ -160,7 +160,6 @@ def register_simple_hook(net, layer_name, channel=-1, loss_func=mean_loss, mode=
 
 # Create layer hook
 def register_layer_hook(net, layer_name, loss_module):
-    layer_name = layer_name.replace('\\', '/').replace('.', '/')
     if len(layer_name.split('/')) == 1:
         getattr(net, layer_name).register_forward_hook(loss_module)
     elif len(layer_name.split('/')) == 2:
