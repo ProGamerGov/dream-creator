@@ -89,10 +89,9 @@ def main_func(params):
 
     # Create basic input
     if params.fft_decorrelation:
-        init_val_size = (3,) + mod_list[0].freqs_shape
-        input_tensor = (torch.randn(*init_val_size) * 0.01).to(params.use_device)
-    else:
-        input_tensor = torch.randn(3,224,224).to(params.use_device) * 0.01
+        input_tensor = torch.randn(*((3,) + mod_list[0].freqs_shape)).to(params.use_device) * 0.01
+     else:
+        input_tensor = torch.randn(3, *params.image_size).to(params.use_device) * 0.01
 
     # Determine how many visualizations to generate
     num_channels, layer_dim = get_num_channels(deepcopy(cnn), params.layer, input_tensor.detach())
