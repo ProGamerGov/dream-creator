@@ -175,6 +175,8 @@ class ChannelRecorder(torch.nn.Module):
 
 # Determine total number of channels
 def get_num_channels(test_net, layer, test_tensor):
+    if test_tensor.dim() > 3:
+        test_tensor = test_tensor[:,:,:,1]
     get_channels = ChannelRecorder()
     channel_catcher = register_layer_hook(test_net, layer, get_channels)
     with torch.no_grad():
