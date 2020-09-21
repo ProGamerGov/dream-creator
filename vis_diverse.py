@@ -139,14 +139,14 @@ def dream(net, img, iterations, lr, loss_modules, print_iter):
 
 
 def register_hook_batch_selective(net, layer_name, loss_func=mean_loss, channel=0, penalty_strength=1e2):
-    loss_module = SimpleDreamLossHookChannels(loss_func, channel, penalty_strength)
+    loss_module = SimpleDreamLossHookDiversity(loss_func, channel, penalty_strength)
     return register_layer_hook(net, layer_name, loss_module)
 
 
 # Define a simple forward hook to collect DeepDream loss for multiple channels
-class SimpleDreamLossHookChannels(torch.nn.Module):
+class SimpleDreamLossHookDiversity(torch.nn.Module):
     def __init__(self, loss_func=mean_loss, channel=0, penalty_strength=1e2):
-        super(SimpleDreamLossHookChannels, self).__init__()
+        super(SimpleDreamLossHookDiversity, self).__init__()
         self.get_loss = loss_func
         self.get_neuron = False
         self.channel = channel
