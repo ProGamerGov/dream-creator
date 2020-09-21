@@ -80,7 +80,7 @@ def main_func(params):
 
     if params.content_image == '':
         if params.fft_decorrelation:
-            init_val_size = (1, 3) + mod_list[0].freqs_shape + (2,) # 2 for imaginary and real components
+            init_val_size = (1, 3) + mod_list[0].freqs_shape + (2,)
             input_tensor = (torch.randn(*init_val_size) * 0.01).to(params.use_device)
         else:
             input_tensor = torch.randn(3,*params.image_size).unsqueeze(0).to(params.use_device) * 0.01
