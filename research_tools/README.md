@@ -14,8 +14,10 @@ Some channels are polysemantic, meaning they contain multiple different features
 * `-num_iterations`: Default is `500`.
 * `-layer`: The specific layer you wish to use. Default is set to `fc`.
 * `-channel`: The specific layer channel you wish to use. Default is `0`.
+* `-extract_neuron`: If this flag is enabled, the center neuron will be extracted from the channel selected by the `-channel` parameter.
 * `-image_size`: A comma separated list of `<height>,<width>` to use for the output images. Default is set to `224,224`.
 * `-jitter`: The amount of image jitter to use for preprocessing. Default is `32`.
+* `-fft_decorrelation`: Whether or not to use FFT spatial decorrelation. If enabled, a lower learning rate should be used.
 
 **Processing options:**
 * `-batch_size`: How many features to attempt to extract from the selected channel. Default is `4`.
@@ -36,7 +38,7 @@ Some channels are polysemantic, meaning they contain multiple different features
 Basic usage:
 
 ```
-python vis_diverse.py -model_file <bvlc_out120>.pth -layer fc -channel 5
+python vis_diverse.py -model_file <bvlc_out120>.pth -layer mixed5a/conv_5x5_relu -channel 5
 ```
 
 
