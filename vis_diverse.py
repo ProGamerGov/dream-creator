@@ -45,6 +45,7 @@ def main():
     # Batch
     parser.add_argument("-batch_size", type=int, default=4)
     parser.add_argument("-channel", type=int, default=0)
+    parser.add_argument("-extract_neuron", action='store_true')
     parser.add_argument("-similarity_penalty", type=float, default=1e2)
     params = parser.parse_args()
 
@@ -96,7 +97,7 @@ def main_func(params):
 
     # Loss module setup
     loss_func = mean_loss
-    loss_modules = register_hook_batch_selective(net=net.net, layer_name=params.layer, loss_func=loss_func, channel=params.channel, penalty_strength=params.similarity_penalty)
+    loss_modules = register_hook_batch_diverse(net=net.net, layer_name=params.layer, loss_func=loss_func, channel=params.channel, penalty_strength=params.similarity_penalty, neuron=params.extract_neuron)
 
     # Stack basic inputs into batch
     input_tensor_list = []
@@ -138,17 +139,17 @@ def dream(net, img, iterations, lr, loss_modules, print_iter):
     return img.detach()
 
 
-def register_hook_batch_selective(net, layer_name, loss_func=mean_loss, channel=0, penalty_strength=1e2):
-    loss_module = SimpleDreamLossHookDiversity(loss_func, channel, penalty_strength)
+def register_hook_batch_diverse(net, layer_name, loss_func=mean_loss, channel=0, penalty_strength=1e2, neuron=False):
+    loss_module = SimpleDreamLossHookDiverse(loss_func, channel, penalty_strength, neuron)
     return register_layer_hook(net, layer_name, loss_module)
 
 
 # Define a simple forward hook to collect DeepDream loss for multiple channels
-class SimpleDreamLossHookDiversity(torch.nn.Module):
-    def __init__(self, loss_func=mean_loss, channel=0, penalty_strength=1e2):
-        super(SimpleDreamLossHookDiversity, self).__init__()
+class SimpleDreamLossHookDiverse(torch.nn.Module):
+    def __init__(self, loss_func=mean_loss, channel=0, penalty_strength=1e2, neuron=False):
+        super(SimpleDreamLossHookDiverse, self).__init__()
         self.get_loss = loss_func
-        self.get_neuron = False
+        self.get_neuron = neuron
         self.channel = channel
         self.penalty_strength = penalty_strength
 
