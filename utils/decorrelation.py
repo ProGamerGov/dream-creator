@@ -3,8 +3,8 @@ import torch.nn as nn
 
 
 
-def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='cpu'):
-    spatial_mod = SpatialDecorrelationLayer(image_size, decay_power=0.75, device=device)
+def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='cpu', decay_power=0.75):
+    spatial_mod = SpatialDecorrelationLayer(image_size, decay_power=decay_power, device=device)
     transform_mod = TransformLayer(input_mean=input_mean, device=device)
     return [spatial_mod, transform_mod]
 
