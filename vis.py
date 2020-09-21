@@ -85,10 +85,7 @@ def main_func(params):
         else:
             input_tensor = torch.randn(3,*params.image_size).unsqueeze(0).to(params.use_device) * 0.01
     else:
-        if params.fft_decorrelation:
-            input_tensor = preprocess_basic(params.content_image, params.image_size).to(params.use_device)
-        else:
-            input_tensor = preprocess(params.content_image, params.image_size, params.data_mean, params.not_caffe).to(params.use_device)
+        input_tensor = preprocess(params.content_image, params.image_size, params.data_mean, params.not_caffe).to(params.use_device)
 
     print('Running optimization with ADAM')
 
