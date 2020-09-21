@@ -175,7 +175,7 @@ class SimpleDreamLossHookBatch(torch.nn.Module):
     def __init__(self, loss_func=mean_loss, neuron=False):
         super(SimpleDreamLossHookBatch, self).__init__()
         self.get_loss = loss_func
-        self.get_neuron = neuron 
+        self.get_neuron = neuron
 
     def extract_neuron(self, input):
         x = input.size(2) // 2
