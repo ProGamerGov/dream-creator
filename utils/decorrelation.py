@@ -8,6 +8,7 @@ def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='c
     transform_mod = TransformLayer(input_mean=input_mean, device=device)
     return [spatial_mod, transform_mod]
 
+
 # Spatial Decorrelation layer based on tensorflow/lucid & greentfrapp/lucent
 class SpatialDecorrelationLayer(torch.nn.Module):
 
