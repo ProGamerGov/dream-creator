@@ -38,7 +38,7 @@ def main():
     parser.add_argument("-not_caffe", action='store_true')
     parser.add_argument("-seed", type=int, default=-1)
     parser.add_argument("-no_branches", action='store_true')
-    
+
     parser.add_argument("-fft_decorrelation", action='store_true')
     params = parser.parse_args()
     params.image_size = [int(m) for m in params.image_size.split(',')]
@@ -68,7 +68,7 @@ def main_func(params):
     # Preprocessing net layers
     jit_mod = Jitter(params.jitter)
     mod_list = []
-    if params.fft_decorrelation:    
+    if params.fft_decorrelation:
         mod_list += get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device)
     mod_list.append(jit_mod)
     prep_net = nn.Sequential(*mod_list)

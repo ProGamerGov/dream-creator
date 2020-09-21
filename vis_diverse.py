@@ -39,7 +39,7 @@ def main():
     parser.add_argument("-seed", type=int, default=-1)
     parser.add_argument("-no_branches", action='store_true')
     parser.add_argument("-save_csv", action='store_true')
-    
+
     parser.add_argument("-fft_decorrelation", action='store_true')
 
     # Batch
@@ -80,7 +80,7 @@ def main_func(params):
     # Preprocessing net layers
     jit_mod = Jitter(params.jitter)
     mod_list = []
-    if params.fft_decorrelation:    
+    if params.fft_decorrelation:
         mod_list += get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device)
     mod_list.append(jit_mod)
     prep_net = nn.Sequential(*mod_list)
@@ -154,7 +154,7 @@ class SimpleDreamLossHookChannels(torch.nn.Module):
 
     def forward(self, module, input, output):
         output = self.extract_neuron(output) if self.get_neuron == True else output
-        if self.channel != -1:    
+        if self.channel != -1:
             loss = -self.get_loss(output[:,self.channel])
         else:
             loss = -self.get_loss(output)
@@ -167,7 +167,7 @@ class SimpleDreamLossHookChannels(torch.nn.Module):
 
 
 # Separate channel into it's parts, based on tensorflow/lucid & greentfrapp/lucent
-def diversity(input):    
+def diversity(input):
     return -sum([ sum([(torch.cosine_similarity(input[j].view(1,-1), input[i].view(1,-1))).sum() for i in range(input.size(0)) if i != j]) \
            for j in range(input.size(0))]) / input.size(0)
 

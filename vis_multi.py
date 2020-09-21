@@ -38,7 +38,7 @@ def main():
     parser.add_argument("-seed", type=int, default=-1)
     parser.add_argument("-no_branches", action='store_true')
     parser.add_argument("-save_csv", action='store_true')
-    
+
     parser.add_argument("-fft_decorrelation", action='store_true')
 
     # Batch
@@ -79,7 +79,7 @@ def main_func(params):
     # Preprocessing net layers
     jit_mod = Jitter(params.jitter)
     mod_list = []
-    if params.fft_decorrelation:    
+    if params.fft_decorrelation:
         mod_list += get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device)
     mod_list.append(jit_mod)
     prep_net = nn.Sequential(*mod_list)
@@ -133,10 +133,10 @@ def main_func(params):
                 input_tensor = input_tensor[:batch_count,:,:,:]
 
         output_tensor = dream(net, input_tensor.clone(), params.num_iterations, params.lr, loss_modules, params.print_iter)
-        
+
         if params.fft_decorrelation:
             output_tensor = mod_list[1](mod_list[0](output_tensor))
-        
+
         for batch_val in range(params.batch_size):
             simple_deprocess(output_tensor[batch_val], output_basename + '_c' + str(vis_count).zfill(4) + '_e' + str(model_epoch).zfill(3) + \
                              '.jpg', params.data_mean, params.not_caffe)
