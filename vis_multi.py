@@ -102,6 +102,7 @@ def main_func(params):
     loss_modules = register_hook_batch_selective(net.net, params.layer, loss_func=loss_func)
     loss_modules[0].layer_dim = layer_dim
 
+    # Stack basic inputs into batch
     input_tensor_list = []
     for t in range(params.batch_size):
         input_tensor_list.append(input_tensor.clone())
