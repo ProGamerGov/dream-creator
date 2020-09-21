@@ -177,6 +177,7 @@ After training a new DeepDream model, you'll need to test it's visualizations. T
 * `-optimizer`: The optimization algorithm to use; either `lbfgs` or `adam`; default is `adam`.
 * `-num_iterations`: Default is `500`.
 * `-layer`: The specific layer you wish to use. Default is set to `fc`.
+* `-extract_neuron`: If this flag is enabled, the center neuron will be extracted from each channel.
 * `-image_size`: A comma separated list of `<height>,<width>` to use for the output image. Default is set to `224,224`.
 * `-jitter`: The amount of image jitter to use for preprocessing. Default is `32`.
 * `-fft_decorrelation`: Whether or not to use FFT spatial decorrelation. If enabled, a lower learning rate should be used.
@@ -220,6 +221,7 @@ This script lets you create DeepDream hallucinations with trained GoogleNet mode
 * `-content_image`: Path to your input image. If no input image is specified, random noise is used instead.
 * `-layer`: The specific layer you wish to use. Default is set to `mixed5a`.
 * `-channel`: The specific layer channel you wish to use. Default is set to `-1` to disable specific channel selection.
+* `-extract_neuron`: If this flag is enabled, the center neuron will be extracted from the channel selected by the `-channel` parameter.
 * `-image_size`: A comma separated list of `<height>,<width>` to use for the output image. Default is set to `224,224`.
 * `-jitter`: The amount of image jitter to use for preprocessing. Default is `32`.
 * `-fft_decorrelation`: Whether or not to use FFT spatial decorrelation. If enabled, a lower learning rate should be used.
