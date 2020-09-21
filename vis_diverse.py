@@ -158,7 +158,7 @@ class SimpleDreamLossHookDiversity(torch.nn.Module):
             loss = -self.get_loss(output[:,self.channel])
         else:
             loss = -self.get_loss(output)
-        self.loss = loss - (self.penalty_strength * diversity(output))
+        self.loss = loss - (self.penalty_strength * diversity(output.clone()))
 
     def extract_neuron(self, input):
         x = input.size(2) // 2
