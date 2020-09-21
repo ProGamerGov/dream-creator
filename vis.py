@@ -7,7 +7,7 @@ import torch.optim as optim
 
 from utils.training_utils import save_csv_data
 from utils.inceptionv1_caffe import relu_to_redirected_relu
-from utils.vis_utils import preprocess, simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_simple_hook, preprocess_basic
+from utils.vis_utils import preprocess, simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_simple_hook
 from utils.decorrelation import get_decorrelation_layers
 
 
