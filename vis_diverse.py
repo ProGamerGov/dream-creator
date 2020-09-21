@@ -96,7 +96,7 @@ def main_func(params):
 
     # Loss module setup
     loss_func = mean_loss
-    loss_modules = register_hook_batch_selective(net=net.net, layer_name=params.layer, loss_func=loss_func, channel=params.channel, penalty_strength=similarity_penalty)
+    loss_modules = register_hook_batch_selective(net=net.net, layer_name=params.layer, loss_func=loss_func, channel=params.channel, penalty_strength=params.similarity_penalty)
 
     # Stack basic inputs into batch
     input_tensor_list = []
