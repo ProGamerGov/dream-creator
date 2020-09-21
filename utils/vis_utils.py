@@ -148,9 +148,10 @@ class Jitter(torch.nn.Module):
 
 
 # Create loss module and hook for multiple channels
-def register_hook_batch(net, layer_name, loss_func=mean_loss):
-    loss_module = SimpleDreamLossHookBatch(loss_func)
+def register_hook_batch(net, layer_name, loss_func=mean_loss, neuron=False):
+    loss_module = SimpleDreamLossHookBatch(loss_func, neuron)
     return register_layer_hook(net, layer_name, loss_module)
+
 
 # Create loss module and hook
 def register_simple_hook(net, layer_name, channel=-1, loss_func=mean_loss, mode='loss', neuron=False):
@@ -171,11 +172,18 @@ def register_layer_hook(net, layer_name, loss_module):
 
 # Define a simple forward hook to collect DeepDream loss for multiple channels
 class SimpleDreamLossHookBatch(torch.nn.Module):
-    def __init__(self, loss_func=mean_loss):
+    def __init__(self, loss_func=mean_loss, neuron=False):
         super(SimpleDreamLossHookBatch, self).__init__()
         self.get_loss = loss_func
+        self.get_neuron = neuron 
+
+    def extract_neuron(self, input):
+        x = input.size(2) // 2
+        y = input.size(3) // 2
+        return input[:, :, y:y+1, x:x+1]
 
     def forward(self, module, input, output):
+        output = self.extract_neuron(output) if self.get_neuron == True else output
         loss = 0
         for batch in range(output.size(0)):
             loss = loss + self.get_loss(output[batch, batch])
@@ -189,9 +197,9 @@ class SimpleDreamLossHook(torch.nn.Module):
         self.channel = channel
         self.get_loss = loss_func
         self.mode = mode
-        self.neuron = neuron
+        self.get_neuron = neuron
 
-    def get_neuron(self, input):
+    def extract_neuron(self, input):
         x = input.size(2) // 2
         y = input.size(3) // 2
         return input[:, :, y:y+1, x:x+1]
@@ -204,8 +212,7 @@ class SimpleDreamLossHook(torch.nn.Module):
 
     def forward(self, module, input, output):
         if self.channel > -1:
-            if self.neuron:
-                output = self.get_neuron(output)
+            output = self.extract_neuron(output) if self.get_neuron == True else output
             output = output[:,self.channel]
         if self.mode == 'loss':
             self.forward_loss(output)
