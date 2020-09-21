@@ -7,6 +7,17 @@ from PIL import Image
 from utils.inceptionv1_caffe import InceptionV1_Caffe
 
 
+# Basic preprocessing with FFT support
+def preprocess_basic(image_name, image_size, fft=True):
+    image = Image.open(image_name).convert('RGB')
+    if type(image_size) is not tuple and type(image_size) is not list:
+        image_size = tuple([int((float(image_size) / max(image.size))*x) for x in (image.height, image.width)])
+    Loader = transforms.Compose([transforms.Resize(image_size), transforms.ToTensor()])
+    tensor = Loader(image).unsqueeze(0)
+    tensor = torch.rfft(tensor, normalized=True, signal_ndim=2)
+    return tensor
+
+
 # Simple preprocess
 def preprocess(image_name, image_size, input_mean, not_caffe):
     image = Image.open(image_name).convert('RGB')
