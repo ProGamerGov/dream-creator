@@ -82,7 +82,7 @@ def main_func(params):
         if params.fft_decorrelation:
             #init_val_size = ((3,) + mod_list[0].freqs_shape + (2,))
             #input_tensor = torch.randn(*init_val_size).unsqueeze(0).to(params.use_device) * 0.01
-            input_tensor = torch.randn(*((3,) + mod_list[0].freqs_shape + (2,))).unsqueeze(0).to(params.use_device) * 0.01
+            input_tensor = torch.randn(*((3,) + mod_list[0].freqs_shape)).unsqueeze(0).to(params.use_device) * 0.01
         else:
             input_tensor = torch.randn(3, *params.image_size).unsqueeze(0).to(params.use_device) * 0.01
     else:
