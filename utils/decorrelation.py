@@ -32,9 +32,9 @@ class SpatialDecorrelationLayer(torch.nn.Module):
 
     def pytorch_fftfreq(self, v, d=1.0):
         results = torch.empty(v)
-        s = (v-1)//2 + 1
+        s = (v - 1) // 2 + 1
         results[:s] = torch.arange(0, s)
-        results[s:] = torch.arange(-(v//2), 0)
+        results[s:] = torch.arange(-(v // 2), 0)
         return results * (1.0 / (v * d))
 
     def fft_image(self, input):
