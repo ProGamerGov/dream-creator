@@ -8,7 +8,7 @@ from copy import deepcopy
 
 from utils.inceptionv1_caffe import relu_to_redirected_relu
 from utils.vis_utils import simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_layer_hook
-
+from utils.decorrelation import get_decorrelation_layers
 
 def main():
     parser = argparse.ArgumentParser()
@@ -37,6 +37,8 @@ def main():
     parser.add_argument("-seed", type=int, default=-1)
     parser.add_argument("-no_branches", action='store_true')
     parser.add_argument("-save_csv", action='store_true')
+    
+    parser.add_argument("-fft_decorrelation", action='store_true')
 
     # Batch
     parser.add_argument("-batch_size", type=int, default=10)
@@ -76,6 +78,8 @@ def main_func(params):
     # Preprocessing net layers
     jit_mod = Jitter(params.jitter)
     mod_list = []
+    if params.fft_decorrelation:    
+        mod_list += get_decorrelation_layers(params.image_size, input_mean=params.data_mean, device=params.use_device)
     mod_list.append(jit_mod)
     prep_net = nn.Sequential(*mod_list)
 
@@ -83,7 +87,11 @@ def main_func(params):
     net = ModelPlus(prep_net, cnn)
 
     # Create basic input
-    input_tensor = torch.randn(3,224,224).to('cuda:0') * 0.01
+    if params.fft_decorrelation:
+        init_val_size = (3,) + mod_list[0].freqs_shape + (2,)
+        input_tensor = (torch.randn(*init_val_size) * 0.01).to(params.use_device)
+    else:
+        input_tensor = torch.randn(3,224,224).to(params.use_device) * 0.01
 
     # Determine how many visualizations to generate
     num_channels, layer_dim = get_num_channels(deepcopy(cnn), params.layer, input_tensor.detach())
@@ -118,9 +126,16 @@ def main_func(params):
 
         batch_count = len(range(loss_modules[0].channel_start, loss_modules[0].channel_end))
         if batch_count < params.batch_size:
-            input_tensor = input_tensor[:batch_count,:,:,:]
+            if params.fft_decorrelation:
+                input_tensor = input_tensor[:batch_count,:,:,:,:]
+            else:
+                input_tensor = input_tensor[:batch_count,:,:,:]
 
         output_tensor = dream(net, input_tensor.clone(), params.num_iterations, params.lr, loss_modules, params.print_iter)
+        
+        if params.fft_decorrelation:
+            output_tensor = mod_list[1](mod_list[0](output_tensor))
+        
         for batch_val in range(params.batch_size):
             simple_deprocess(output_tensor[batch_val], output_basename + '_c' + str(vis_count).zfill(4) + '_e' + str(model_epoch).zfill(3) + \
                              '.jpg', params.data_mean, params.not_caffe)
