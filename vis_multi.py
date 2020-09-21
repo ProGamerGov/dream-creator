@@ -80,7 +80,7 @@ def main_func(params):
     jit_mod = Jitter(params.jitter)
     mod_list = []
     if params.fft_decorrelation:    
-        mod_list += get_decorrelation_layers(params.image_size, input_mean=params.data_mean, device=params.use_device)
+        mod_list += get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device)
     mod_list.append(jit_mod)
     prep_net = nn.Sequential(*mod_list)
 
