@@ -7,7 +7,8 @@ import torch.optim as optim
 
 from utils.training_utils import save_csv_data
 from utils.inceptionv1_caffe import relu_to_redirected_relu
-from utils.vis_utils import preprocess, simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_simple_hook
+from utils.vis_utils2 import preprocess, simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_simple_hook, preprocess_basic
+from utils.decorrelation import get_decorrelation_layers
 
 
 def main():
@@ -37,6 +38,8 @@ def main():
     parser.add_argument("-not_caffe", action='store_true')
     parser.add_argument("-seed", type=int, default=-1)
     parser.add_argument("-no_branches", action='store_true')
+    
+    parser.add_argument("-fft_decorrelation", action='store_true')
     params = parser.parse_args()
     params.image_size = [int(m) for m in params.image_size.split(',')]
     main_func(params)
@@ -65,6 +68,8 @@ def main_func(params):
     # Preprocessing net layers
     jit_mod = Jitter(params.jitter)
     mod_list = []
+    if params.fft_decorrelation:    
+        mod_list += get_decorrelation_layers(params.image_size, input_mean=params.data_mean, device=params.use_device)
     mod_list.append(jit_mod)
     prep_net = nn.Sequential(*mod_list)
 
@@ -74,15 +79,24 @@ def main_func(params):
     loss_modules = register_simple_hook(net.net, params.layer, params.channel, loss_func=loss_func, neuron=params.center_neuron)
 
     if params.content_image == '':
-        input_tensor = torch.randn(3,*params.image_size).unsqueeze(0).to(params.use_device) * 0.01
+        if params.fft_decorrelation:
+            init_val_size = (1, 3) + mod_list[0].freqs_shape + (2,) # 2 for imaginary and real components
+            input_tensor = (torch.randn(*init_val_size) * 0.01).to(params.use_device)
+        else:
+            input_tensor = torch.randn(3,*params.image_size).unsqueeze(0).to(params.use_device) * 0.01
     else:
-        input_tensor = preprocess(params.content_image, params.image_size, params.data_mean, params.not_caffe).to(params.use_device)
+        if params.fft_decorrelation:
+            input_tensor = preprocess_basic(params.content_image, params.image_size).to(params.use_device)
+        else:
+            input_tensor = preprocess(params.content_image, params.image_size, params.data_mean, params.not_caffe).to(params.use_device)
 
     print('Running optimization with ADAM')
 
     # Create 224x224 image
     output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.data_mean, \
                           params.save_iter, params.print_iter, params.output_image, params.not_caffe)
+    if params.fft_decorrelation:
+        output_tensor = mod_list[1](mod_list[0](output_tensor))
     simple_deprocess(output_tensor, params.output_image, params.data_mean, params.not_caffe)
 
 
