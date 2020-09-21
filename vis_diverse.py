@@ -9,6 +9,7 @@ from copy import deepcopy
 
 from utils.inceptionv1_caffe import relu_to_redirected_relu
 from utils.vis_utils import simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_layer_hook
+from utils.decorrelation import get_decorrelation_layers
 
 
 def main():
@@ -38,6 +39,8 @@ def main():
     parser.add_argument("-seed", type=int, default=-1)
     parser.add_argument("-no_branches", action='store_true')
     parser.add_argument("-save_csv", action='store_true')
+    
+    parser.add_argument("-fft_decorrelation", action='store_true')
 
     # Batch
     parser.add_argument("-batch_size", type=int, default=4)
@@ -77,6 +80,8 @@ def main_func(params):
     # Preprocessing net layers
     jit_mod = Jitter(params.jitter)
     mod_list = []
+    if params.fft_decorrelation:    
+        mod_list += get_decorrelation_layers(params.image_size, input_mean=params.data_mean, device=params.use_device)
     mod_list.append(jit_mod)
     prep_net = nn.Sequential(*mod_list)
 
@@ -84,12 +89,17 @@ def main_func(params):
     net = ModelPlus(prep_net, cnn)
 
     # Create basic input
-    input_tensor = torch.randn(3,224,224).to('cuda:0') * 0.01
+    if params.fft_decorrelation:
+        init_val_size = (3,) + mod_list[0].freqs_shape + (2,)
+        input_tensor = (torch.randn(*init_val_size) * 0.01).to(params.use_device)
+    else:
+        input_tensor = torch.randn(3,224,224).to(params.use_device) * 0.01
 
     # Loss module setup
     loss_func = mean_loss
     loss_modules = register_hook_batch_selective(net=net.net, layer_name=params.layer, loss_func=loss_func, channel=params.channel, penalty_strength=similarity_penalty)
 
+    # Stack basic inputs into batch
     input_tensor_list = []
     for t in range(params.batch_size):
         input_tensor_list.append(input_tensor.clone())
@@ -99,8 +109,10 @@ def main_func(params):
 
     print('\nAttempting to extract ' + str(params.batch_size) + ' different features from ' + params.layer + ' channel ' + str(params.channel))
     print('Running optimization with ADAM\n')
-    with torch.autograd.set_detect_anomaly(True):
-        output_tensor = dream(net, input_tensor.clone(), params.num_iterations, params.lr, loss_modules, params.print_iter)
+    output_tensor = dream(net, input_tensor.clone(), params.num_iterations, params.lr, loss_modules, params.print_iter)
+
+    if params.fft_decorrelation:
+        output_tensor = mod_list[1](mod_list[0](output_tensor))
 
     for batch_val in range(params.batch_size):
         simple_deprocess(output_tensor[batch_val], output_basename + '_c' + str(params.channel).zfill(4) + '_f' + str(batch_val).zfill(3)  + '_e' + str(model_epoch).zfill(3) + \
@@ -143,8 +155,10 @@ class SimpleDreamLossHookChannels(torch.nn.Module):
 
     def forward(self, module, input, output):
         output = self.extract_neuron(output) if self.get_neuron == True else output
-        loss = 0
-        loss = -self.get_loss(output[:,self.channel])
+        if self.channel != -1:    
+            loss = -self.get_loss(output[:,self.channel])
+        else:
+            loss = -self.get_loss(output)
         self.loss = loss - (self.penalty_strength * diversity(output))
 
     def extract_neuron(self, input):
@@ -153,7 +167,7 @@ class SimpleDreamLossHookChannels(torch.nn.Module):
         return input[:, :, y:y+1, x:x+1]
 
 
-# Separate channel into it's parts
+# Separate channel into it's parts, based on tensorflow/lucid & greentfrapp/lucent
 def diversity(input):    
     return -sum([ sum([(torch.cosine_similarity(input[j].view(1,-1), input[i].view(1,-1))).sum() for i in range(input.size(0)) if i != j]) \
            for j in range(input.size(0))]) / input.size(0)
