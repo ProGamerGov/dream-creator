@@ -19,7 +19,7 @@ def main():
     parser.add_argument("-layer", type=str, default='mixed5a')
     parser.add_argument("-model_file", type=str, default='')
     parser.add_argument("-channel", type=int, default=-1)
-    parser.add_argument("-center_neuron", action='store_true')
+    parser.add_argument("-extract_neuron", action='store_true')
     parser.add_argument("-image_size", type=str, default='224,224')
     parser.add_argument("-content_image", type=str, default='')
 
@@ -76,7 +76,7 @@ def main_func(params):
     # Full network
     net = ModelPlus(prep_net, cnn)
     loss_func = mean_loss
-    loss_modules = register_simple_hook(net.net, params.layer, params.channel, loss_func=loss_func, neuron=params.center_neuron)
+    loss_modules = register_simple_hook(net.net, params.layer, params.channel, loss_func=loss_func, neuron=params.extract_neuron)
 
     if params.content_image == '':
         if params.fft_decorrelation:
