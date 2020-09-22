@@ -90,7 +90,7 @@ def main_func(params):
     # Create basic input
     if params.fft_decorrelation:
         input_tensor = torch.randn(*((3,) + mod_list[0].freqs_shape)).to(params.use_device) * 0.01
-     else:
+    else:
         input_tensor = torch.randn(3, *params.image_size).to(params.use_device) * 0.01
 
     # Determine how many visualizations to generate
