@@ -23,9 +23,9 @@ def main_calc(params):
     if not params.not_caffe:
         range_change = transforms.Compose([transforms.Lambda(lambda x: x*255)])
         transform_list += [range_change]
-        if not params.use_rgb:
-            rgb2bgr = transforms.Compose([transforms.Lambda(lambda x: x[torch.LongTensor([2,1,0])])])
-            transform_list += [rgb2bgr]
+    if not params.use_rgb:
+        rgb2bgr = transforms.Compose([transforms.Lambda(lambda x: x[torch.LongTensor([2,1,0])])])
+        transform_list += [rgb2bgr]
 
     dataset = torchvision.datasets.ImageFolder(params.data_path, transform=transforms.Compose(transform_list))
     loader = torch.utils.data.DataLoader(dataset, batch_size=params.batch_size, num_workers=0, shuffle=False)
