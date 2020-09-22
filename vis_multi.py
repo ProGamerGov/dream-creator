@@ -37,7 +37,6 @@ def main():
     parser.add_argument("-not_caffe", action='store_true')
     parser.add_argument("-seed", type=int, default=-1)
     parser.add_argument("-no_branches", action='store_true')
-    parser.add_argument("-save_csv", action='store_true')
 
     parser.add_argument("-fft_decorrelation", action='store_true')
 
