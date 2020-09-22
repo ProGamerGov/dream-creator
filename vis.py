@@ -58,7 +58,7 @@ def main_func(params):
     else:
         params.data_mean = [float(m) for m in params.data_mean.split(',')]
 
-    relu_to_redirected_relu(cnn)6
+    relu_to_redirected_relu(cnn)
 
     cnn = cnn.to(params.use_device).eval()
     for param in cnn.parameters():
