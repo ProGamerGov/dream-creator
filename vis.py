@@ -58,7 +58,7 @@ def main_func(params):
     else:
         params.data_mean = [float(m) for m in params.data_mean.split(',')]
 
-    relu_to_redirected_relu(cnn)
+    relu_to_redirected_relu(cnn)6
 
     cnn = cnn.to(params.use_device).eval()
     for param in cnn.parameters():
@@ -88,15 +88,15 @@ def main_func(params):
     print('Running optimization with ADAM')
 
     # Create 224x224 image
-    output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.data_mean, \
-                          params.save_iter, params.print_iter, params.output_image, params.not_caffe)
+    output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.save_iter, \
+                          params.print_iter, params.output_image, [params.data_mean, params.not_caffe], mod_list)
     if params.fft_decorrelation:
         output_tensor = mod_list[1](mod_list[0](output_tensor))
     simple_deprocess(output_tensor, params.output_image, params.data_mean, params.not_caffe)
 
 
 # Function to maximize CNN activations
-def dream(net, img, iterations, lr, loss_modules, m, save_iter, print_iter, output_image, not_caffe):
+def dream(net, img, iterations, lr, loss_modules, save_iter, print_iter, output_image, deprocess_info, fft_decorrelation):
     filename, ext = os.path.splitext(output_image)
     img = nn.Parameter(img)
     optimizer = torch.optim.Adam([img], lr=lr)
@@ -112,7 +112,11 @@ def dream(net, img, iterations, lr, loss_modules, m, save_iter, print_iter, outp
             print('Iteration', str(i) + ',', 'Loss', str(loss.item()))
 
         if save_iter > 0 and i > 0 and i % save_iter == 0:
-            simple_deprocess(img.detach(), filename + '_' + str(i) + ext, m, not_caffe)
+            if fft_decorrelation > 1:
+                simple_deprocess(fft_decorrelation[1](fft_decorrelation[0](img.detach())), filename + '_' + str(i) + \
+                                 ext, deprocess_info[0], deprocess_info[1])
+            else:
+                simple_deprocess(img.detach(), filename + '_' + str(i) + ext, deprocess_info[0], deprocess_info[1])
         optimizer.step()
     return img.detach()
 
