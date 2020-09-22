@@ -96,7 +96,7 @@ def main_func(params):
 
 
 # Function to maximize CNN activations
-def dream(net, img, iterations, lr, loss_modules, save_iter, print_iter, output_image, deprocess_info, fft_decorrelation):
+def dream(net, img, iterations, lr, loss_modules, save_iter, print_iter, output_image, deprocess_info, mod_list):
     filename, ext = os.path.splitext(output_image)
     img = nn.Parameter(img)
     optimizer = torch.optim.Adam([img], lr=lr)
@@ -112,8 +112,8 @@ def dream(net, img, iterations, lr, loss_modules, save_iter, print_iter, output_
             print('Iteration', str(i) + ',', 'Loss', str(loss.item()))
 
         if save_iter > 0 and i > 0 and i % save_iter == 0:
-            if fft_decorrelation > 1:
-                simple_deprocess(fft_decorrelation[1](fft_decorrelation[0](img.detach())), filename + '_' + str(i) + \
+            if len(mod_list) > 1:
+                simple_deprocess(mod_list[1](mod_list[0](img.detach())), filename + '_' + str(i) + \
                                  ext, deprocess_info[0], deprocess_info[1])
             else:
                 simple_deprocess(img.detach(), filename + '_' + str(i) + ext, deprocess_info[0], deprocess_info[1])
