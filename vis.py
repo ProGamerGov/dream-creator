@@ -73,7 +73,7 @@ def main_func(params):
                                                            decorrelate=(params.fft_decorrelation, params.color_decorrelation))
         mod_list += d_layers
     if params.random_scale:
-        scale_mod = RandomScaleLayer() 
+        scale_mod = RandomScaleLayer(params.random_scale) 
         mod_list.append(scale_mod)
     if params.jitter > 0:
         jit_mod = Jitter(params.jitter)
