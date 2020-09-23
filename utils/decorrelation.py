@@ -13,10 +13,9 @@ def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='c
         matrix = 'imagenet' if decorrelate[1] == '' or decorrelate[1].lower() == 'imagenet' else decorrelate[1]
         color_mod = ColorDecorrelationLayer(correlation_matrix=matrix, device=device)
         mod_list.append(color_mod)
-    if decorrelate[0] == True or decorrelate[1] == True:
-        transform_mod = TransformLayer(input_mean=input_mean, device=device)
-        mod_list.append(transform_mod)
- 
+    transform_mod = TransformLayer(input_mean=input_mean, device=device)
+    mod_list.append(transform_mod)
+
     if decorrelate[0] == True and decorrelate[1] == False:
         deprocess_img = lambda x: transform_mod.forward(spatial_mod.forward(x)) 
     elif decorrelate[0] == False and decorrelate[1] != False:
@@ -83,9 +82,8 @@ class ColorDecorrelationLayer(nn.Module):
                                                       [0.27, 0.00, -0.05],
                                                       [0.27, -0.09, 0.03]])
         elif matrix.lower() == 'places365':
-            color_correlation_svd_sqrt = torch.Tensor([[0.26, 0.09, 0.02], #Placeholder
-                                                      [0.27, 0.00, -0.05],
-                                                      [0.27, -0.09, 0.03]])
+            raise NotImplementedError
+
         return color_correlation_svd_sqrt
 
     def color_correlation_normalized(self, matrix):
