@@ -10,8 +10,9 @@ def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='c
         spatial_mod = SpatialDecorrelationLayer(image_size, decay_power=decay_power, device=device)
         recorrelate_img = lambda x: spatial_mod.forward(recorrelate_img(x))
         mod_list.append(spatial_mod)
-    if decorrelate[1] == True:
-        color_mod = ColorDecorrelationLayer(device=device)
+    if decorrelate[1] != False:
+        matrix = 'imagenet' if decorrelate[1] == '' or decorrelate[1].lower() == 'imagenet' else decorrelate[1]
+        color_mod = ColorDecorrelationLayer(correlation_matrix=matrix, device=device)
         recorrelate_img = lambda x: color_mod.forward(recorrelate_img(x)) 
         mod_list.append(color_mod)
     if decorrelate[0] == True or decorrelate[1] == True:
@@ -69,7 +70,7 @@ class ColorDecorrelationLayer(nn.Module):
         if torch.is_tensor(matrix):
             color_correlation_svd_sqrt = matrix
         elif ',' in matrix:
-            m = [float(mx) for mx in matrix.split(',')]      
+            m = [float(mx) for mx in matrix.replace('n','-').split(',')]         
             color_correlation_svd_sqrt = torch.Tensor([[m[0], m[1], m[2]],
                                                       [m[3], m[4], m[5]],
                                                       [m[6], m[7], m[8]]])
