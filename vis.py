@@ -91,6 +91,7 @@ def main_func(params):
     loss_func = mean_loss
     loss_modules = register_simple_hook(net.net, params.layer, params.channel, loss_func=loss_func, neuron=params.extract_neuron)
 
+    # Create input image
     if params.content_image == '':
         if params.fft_decorrelation:
             input_tensor = torch.randn(*((3,) + mod_list[0].freqs_shape)).unsqueeze(0).to(params.use_device) * 0.01
@@ -101,7 +102,7 @@ def main_func(params):
 
     print('Running optimization with ADAM')
 
-    # Create 224x224 image
+    # Create visualization(s)
     output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.save_iter, \
                           params.print_iter, params.output_image, [params.data_mean, params.not_caffe], deprocess_img)
     if deprocess_img != None:
