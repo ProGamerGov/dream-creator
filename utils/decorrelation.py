@@ -86,7 +86,6 @@ class ColorDecorrelationLayer(nn.Module):
                                                       [0.27, -0.09, 0.03]])
         elif matrix.lower() == 'places365':
             raise NotImplementedError
-
         return color_correlation_svd_sqrt
 
     def color_correlation_normalized(self, matrix):
