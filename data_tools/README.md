@@ -47,6 +47,19 @@ python calc_ms.py -data_path <training_data>
 
 * `-use_rgb`: Enabling this flag will result in output values being in RGB format instead of BGR.
 
+
+## Dataset RGB Covariance Matrix Calculation
+
+This script calculates the RGB covariance matrix required for color decorrelation.
+
+```
+python calc_cm.py -data_path <training_data>
+```
+
+* `-use_rgb`: Enabling this flag will result in output values being in RGB format instead of BGR.
+* `-model_file`: Optionally provide a path to the model that you wish to add the color matrix to.
+* `-output_file`: Optionally provide a name for the output model. If left blank, then `-model_file` will be used instead.
+
 ## FC Channel Contents
 
 This script will print which categories correspond to which FC layer layer channels. This is useful for when you are confused as to which channels correspond to which categories/classes.
