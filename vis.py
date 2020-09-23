@@ -7,7 +7,7 @@ import torch.optim as optim
 
 from utils.inceptionv1_caffe import relu_to_redirected_relu
 from utils.vis_utils import preprocess, simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_simple_hook
-from utils.decorrelation import get_decorrelation_layers
+from utils.decorrelation import get_decorrelation_layers, RandomScaleLayer
 
 
 def main():
@@ -31,14 +31,15 @@ def main():
     parser.add_argument( "-lr", "-learning_rate", type=float, default=1.5)
     parser.add_argument("-num_iterations", type=int, default=500)
     parser.add_argument("-jitter", type=int, default=32)
+    parser.add_argument("-fft_decorrelation", action='store_true')
+    parser.add_argument("-color_decorrelation", help="", nargs="?", type=str, const="none")
+    parser.add_argument("-random_scale", help="", nargs="?", type=str, const="none")
 
     # Other options
     parser.add_argument("-use_device", type=str, default='cuda:0')
     parser.add_argument("-not_caffe", action='store_true')
     parser.add_argument("-seed", type=int, default=-1)
     parser.add_argument("-no_branches", action='store_true')
-
-    parser.add_argument("-fft_decorrelation", action='store_true')
     params = parser.parse_args()
     params.image_size = [int(m) for m in params.image_size.split(',')]
     main_func(params)
@@ -65,11 +66,24 @@ def main_func(params):
         params.requires_grad = False
 
     # Preprocessing net layers
-    jit_mod = Jitter(params.jitter)
     mod_list = []
-    if params.fft_decorrelation:
-        mod_list += get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device)
-    mod_list.append(jit_mod)
+    if params.fft_decorrelation or params.color_decorrelation:
+        if params.color_decorrelation == 'none':
+            try:
+                params.color_decorrelation = torch.load(params.model_file)['color_correlation_svd_sqrt']
+            except:
+                pass
+        d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device, \
+                                                           decorrelate=(params.fft_decorrelation, params.color_decorrelation))
+        mod_list += d_layers
+    else:
+        deprocess_img = None
+    if params.random_scale:
+        scale_mod = RandomScaleLayer(params.random_scale)
+        mod_list.append(scale_mod)
+    if params.jitter > 0:
+        jit_mod = Jitter(params.jitter)
+        mod_list.append(jit_mod)
     prep_net = nn.Sequential(*mod_list)
 
     # Full network
@@ -77,6 +91,7 @@ def main_func(params):
     loss_func = mean_loss
     loss_modules = register_simple_hook(net.net, params.layer, params.channel, loss_func=loss_func, neuron=params.extract_neuron)
 
+    # Create input image
     if params.content_image == '':
         if params.fft_decorrelation:
             input_tensor = torch.randn(*((3,) + mod_list[0].freqs_shape)).unsqueeze(0).to(params.use_device) * 0.01
@@ -87,16 +102,16 @@ def main_func(params):
 
     print('Running optimization with ADAM')
 
-    # Create 224x224 image
+    # Create visualization(s)
     output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.save_iter, \
-                          params.print_iter, params.output_image, [params.data_mean, params.not_caffe], mod_list)
-    if params.fft_decorrelation:
-        output_tensor = mod_list[1](mod_list[0](output_tensor))
+                          params.print_iter, params.output_image, [params.data_mean, params.not_caffe], deprocess_img)
+    if deprocess_img != None:
+        output_tensor = deprocess_img(output_tensor)
     simple_deprocess(output_tensor, params.output_image, params.data_mean, params.not_caffe)
 
 
 # Function to maximize CNN activations
-def dream(net, img, iterations, lr, loss_modules, save_iter, print_iter, output_image, deprocess_info, mod_list):
+def dream(net, img, iterations, lr, loss_modules, save_iter, print_iter, output_image, deprocess_info, deprocess_img):
     filename, ext = os.path.splitext(output_image)
     img = nn.Parameter(img)
     optimizer = torch.optim.Adam([img], lr=lr)
@@ -112,8 +127,8 @@ def dream(net, img, iterations, lr, loss_modules, save_iter, print_iter, output_
             print('Iteration', str(i) + ',', 'Loss', str(loss.item()))
 
         if save_iter > 0 and i > 0 and i % save_iter == 0:
-            if len(mod_list) > 1:
-                simple_deprocess(mod_list[1](mod_list[0](img.detach())), filename + '_' + str(i) + \
+            if deprocess_img != None:
+                simple_deprocess(deprocess_img(img.detach()), filename + '_' + str(i) + \
                                  ext, deprocess_info[0], deprocess_info[1])
             else:
                 simple_deprocess(img.detach(), filename + '_' + str(i) + ext, deprocess_info[0], deprocess_info[1])

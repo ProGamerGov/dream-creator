@@ -9,7 +9,7 @@ from copy import deepcopy
 
 from utils.inceptionv1_caffe import relu_to_redirected_relu
 from utils.vis_utils import simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_layer_hook
-from utils.decorrelation import get_decorrelation_layers
+from utils.decorrelation import get_decorrelation_layers, RandomScaleLayer
 
 
 def main():
@@ -32,14 +32,15 @@ def main():
     parser.add_argument( "-lr", "-learning_rate", type=float, default=1.5)
     parser.add_argument("-num_iterations", type=int, default=500)
     parser.add_argument("-jitter", type=int, default=32)
+    parser.add_argument("-fft_decorrelation", action='store_true')
+    parser.add_argument("-color_decorrelation", help="", nargs="?", type=str, const="none")
+    parser.add_argument("-random_scale", nargs="?", type=str, const="none")
 
     # Other options
     parser.add_argument("-use_device", type=str, default='cuda:0')
     parser.add_argument("-not_caffe", action='store_true')
     parser.add_argument("-seed", type=int, default=-1)
     parser.add_argument("-no_branches", action='store_true')
-
-    parser.add_argument("-fft_decorrelation", action='store_true')
 
     # Batch
     parser.add_argument("-batch_size", type=int, default=4)
@@ -78,11 +79,24 @@ def main_func(params):
         params.requires_grad = False
 
     # Preprocessing net layers
-    jit_mod = Jitter(params.jitter)
     mod_list = []
-    if params.fft_decorrelation:
-        mod_list += get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device)
-    mod_list.append(jit_mod)
+    if params.fft_decorrelation or params.color_decorrelation:
+        if params.color_decorrelation == 'none':
+            try:
+                params.color_decorrelation = torch.load(params.model_file)['color_correlation_svd_sqrt']
+            except:
+                pass
+        d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device, \
+                                                           decorrelate=(params.fft_decorrelation, params.color_decorrelation))
+        mod_list += d_layers
+    else:
+        deprocess_img = None
+    if params.random_scale:
+        scale_mod = RandomScaleLayer(params.random_scale)
+        mod_list.append(scale_mod)
+    if params.jitter > 0:
+        jit_mod = Jitter(params.jitter)
+        mod_list.append(jit_mod)
     prep_net = nn.Sequential(*mod_list)
 
     # Full network
@@ -110,8 +124,8 @@ def main_func(params):
     print('Running optimization with ADAM\n')
     output_tensor = dream(net, input_tensor.clone(), params.num_iterations, params.lr, loss_modules, params.print_iter)
 
-    if params.fft_decorrelation:
-        output_tensor = mod_list[1](mod_list[0](output_tensor))
+    if deprocess_img != None:
+        output_tensor = deprocess_img(output_tensor)
 
     for batch_val in range(params.batch_size):
         simple_deprocess(output_tensor[batch_val], output_basename + '_c' + str(params.channel).zfill(4) + '_f' + str(batch_val).zfill(3)  + '_e' + str(model_epoch).zfill(3) + \

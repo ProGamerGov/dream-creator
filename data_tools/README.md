@@ -9,15 +9,17 @@ All of these scripts with the exception of `sort_images.py` can be copied to and
 
    1. [Dataset Mean and Standard Deviation Calculation](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#dataset-mean-and-standard-deviation-calculation)
 
-   2. [FC Channel Contents](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#fc-channel-contents)
+   2. [Dataset RGB Covariance Matrix Calculation](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#dataset-rgb-covariance-matrix-calculation)
 
-   3. [Dataset Image Resizing](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#dataset-image-resizing)
+   3. [FC Channel Contents](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#fc-channel-contents)
 
-   4. [Corrupt Image Detector & Remover](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#corrupt-image-detector--remover)
+   4. [Dataset Image Resizing](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#dataset-image-resizing)
 
-   5. [Image Extractor](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#image-extractor)
+   5. [Corrupt Image Detector & Remover](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#corrupt-image-detector--remover)
 
-   6. [Automatic Image Sorter](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#automatic-image-sorter)
+   6. [Image Extractor](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#image-extractor)
+
+   7. [Automatic Image Sorter](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#automatic-image-sorter)
 
 2. [Model Tools]()
 
@@ -46,6 +48,19 @@ python calc_ms.py -data_path <training_data>
 * `-not_caffe`: Enabling this flag will result in the mean and standard deviation output having a range of 0-1 instead of 0-255.
 
 * `-use_rgb`: Enabling this flag will result in output values being in RGB format instead of BGR.
+
+
+## Dataset RGB Covariance Matrix Calculation
+
+This script calculates the RGB covariance matrix required for color decorrelation.
+
+```
+python calc_cm.py -data_path <training_data>
+```
+
+* `-use_rgb`: Enabling this flag will result in output values being in RGB format instead of BGR.
+* `-model_file`: Optionally provide a path to the model that you wish to add the color matrix to.
+* `-output_file`: Optionally provide a name for the output model. If left blank, then `-model_file` will be used instead.
 
 ## FC Channel Contents
 

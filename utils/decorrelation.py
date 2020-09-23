@@ -1,12 +1,31 @@
+import random
 import torch
 import torch.nn as nn
 
 
-
-def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='cpu', decay_power=0.75):
-    spatial_mod = SpatialDecorrelationLayer(image_size, decay_power=decay_power, device=device)
+# Helper function for returning deprocessing of decorrelated tensors
+def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='cpu', decay_power=0.75, decorrelate=[True,None]):
+    mod_list = []
+    if decorrelate[0] == True:
+        spatial_mod = SpatialDecorrelationLayer(image_size, decay_power=decay_power, device=device)
+        mod_list.append(spatial_mod)
+    if decorrelate[1] != None:
+        if torch.is_tensor(decorrelate[1]):
+            matrix = decorrelate[1]
+        else:
+            matrix = 'imagenet' if decorrelate[1] == 'none' or decorrelate[1].lower() == 'imagenet' else decorrelate[1]
+        color_mod = ColorDecorrelationLayer(correlation_matrix=matrix, device=device)
+        mod_list.append(color_mod)
     transform_mod = TransformLayer(input_mean=input_mean, device=device)
-    return [spatial_mod, transform_mod]
+    mod_list.append(transform_mod)
+
+    if decorrelate[0] == True and decorrelate[1] == None:
+        deprocess_img = lambda x: transform_mod.forward(spatial_mod.forward(x))
+    elif decorrelate[0] == False and decorrelate[1] != None:
+        deprocess_img = lambda x: transform_mod.forward(color_mod.forward(x))
+    elif decorrelate[0] == True and decorrelate[1] != None:
+        deprocess_img = lambda x: transform_mod.forward(color_mod.forward(spatial_mod.forward(x)))
+    return mod_list, deprocess_img
 
 
 # Spatial Decorrelation layer based on tensorflow/lucid & greentfrapp/lucent
@@ -46,6 +65,39 @@ class SpatialDecorrelationLayer(torch.nn.Module):
         return self.ifft_image(input)
 
 
+# Color Decorrelation layer based on tensorflow/lucid & greentfrapp/lucent
+class ColorDecorrelationLayer(nn.Module):
+
+    def __init__(self, correlation_matrix='imagenet', device='cpu'):
+        super(ColorDecorrelationLayer, self).__init__()
+        self.color_correlation_n = self.color_correlation_normalized(correlation_matrix).to(device)
+
+    def get_matrix(self, matrix='imagenet'):
+        if torch.is_tensor(matrix):
+            color_correlation_svd_sqrt = matrix
+        elif ',' in matrix:
+            m = [float(mx) for mx in matrix.replace('n','-').split(',')]
+            color_correlation_svd_sqrt = torch.Tensor([[m[0], m[1], m[2]],
+                                                      [m[3], m[4], m[5]],
+                                                      [m[6], m[7], m[8]]])
+        elif matrix.lower() == 'imagenet':
+            color_correlation_svd_sqrt = torch.Tensor([[0.26, 0.09, 0.02],
+                                                      [0.27, 0.00, -0.05],
+                                                      [0.27, -0.09, 0.03]])
+        elif matrix.lower() == 'places365':
+            raise NotImplementedError
+        return color_correlation_svd_sqrt
+
+    def color_correlation_normalized(self, matrix):
+        color_correlation_svd_sqrt = self.get_matrix(matrix)
+        max_norm_svd_sqrt = torch.max(color_correlation_svd_sqrt.norm(0))
+        color_correlation_normalized = color_correlation_svd_sqrt / max_norm_svd_sqrt
+        return color_correlation_normalized.T
+
+    def forward(self, input):
+        return torch.matmul(input.permute(0,2,3,1), self.color_correlation_n).permute(0,3,1,2)
+
+
 # Preprocess input after decorrelation
 class TransformLayer(torch.nn.Module):
 
@@ -58,3 +110,20 @@ class TransformLayer(torch.nn.Module):
     def forward(self, input):
         input = torch.sigmoid(input) * self.r
         return input.sub(self.input_mean[None, :, None, None]).div(self.input_sd[None, :, None, None])
+
+
+# Randomly scale an input
+class RandomScaleLayer(torch.nn.Module):
+
+    def __init__(self, scale_list=(1, 0.975, 1.025, 0.95, 1.05)):
+        super(RandomScaleLayer, self).__init__()
+        scale_list = (1, 0.975, 1.025, 0.95, 1.05) if scale_list == 'none' else scale_list
+        scale_list = [float(s) for s in scale_list.split(',')] if ',' in scale_list else scale_list
+        self.scale_list = scale_list
+
+    def rescale_tensor(self, input, scale, align_corners=True):
+        return torch.nn.functional.interpolate(input, scale_factor=scale, mode='bilinear', align_corners=align_corners)
+
+    def forward(self, input):
+        n = random.randint(0, len(self.scale_list)-1)
+        return self.rescale_tensor(input, scale=self.scale_list[n])
