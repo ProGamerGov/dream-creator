@@ -100,7 +100,7 @@ def main_func(params):
     # Create 224x224 image
     output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.save_iter, \
                           params.print_iter, params.output_image, [params.data_mean, params.not_caffe], deprocess_img)
-    if params.fft_decorrelation:
+    if deprocess_img != None:
         output_tensor = deprocess_img(output_tensor)
     simple_deprocess(output_tensor, params.output_image, params.data_mean, params.not_caffe)
 
