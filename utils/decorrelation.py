@@ -2,14 +2,23 @@ import torch
 import torch.nn as nn
 
 
-
-def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='cpu', decay_power=0.75):
-    spatial_mod = SpatialDecorrelationLayer(image_size, decay_power=decay_power, device=device)
-    transform_mod = TransformLayer(input_mean=input_mean, device=device)
-    
-    deprocess_img = lambda x: transform_mod.forward(spatial_mod.forward(x))
-    #deprocess_img = lambda x: x # If not using FFT
-    return [spatial_mod, transform_mod], deprocess_img
+# Helper function for returning deprocessing of decorrelated tensors
+def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='cpu', decay_power=0.75, decorrelate=[True,False]):
+    mod_list = []
+    recorrelate_img = lambda x: x
+    if decorrelate[0] == True:
+        spatial_mod = SpatialDecorrelationLayer(image_size, decay_power=decay_power, device=device)
+        recorrelate_img = lambda x: spatial_mod.forward(recorrelate_img(x))
+        mod_list.append(spatial_mod)
+    if decorrelate[1] == True:
+        color_mod = ColorDecorrelationLayer(device=device)
+        recorrelate_img = lambda x: color_mod.forward(recorrelate_img(x)) 
+        mod_list.append(color_mod)
+    if decorrelate[0] == True or decorrelate[1] == True:
+        transform_mod = TransformLayer(input_mean=input_mean, device=device)
+        deprocess_img = lambda x: transform_mod.forward(recorrelate_img(x))
+        mod_list.append(transform_mod)
+    return mod_list, deprocess_img
 
 
 # Spatial Decorrelation layer based on tensorflow/lucid & greentfrapp/lucent
@@ -47,6 +56,41 @@ class SpatialDecorrelationLayer(torch.nn.Module):
 
     def forward(self, input):
         return self.ifft_image(input)
+
+
+# Color Decorrelation layer based on tensorflow/lucid & greentfrapp/lucent
+class ColorDecorrelationLayer(nn.Module):
+
+    def __init__(self, correlation_matrix='imagenet', device='cpu'):
+        super(ColorDecorrelationLayer, self).__init__()
+        self.color_correlation_n = self.color_correlation_normalized(correlation_matrix).to(device)
+        
+    def get_matrix(self, matrix='imagenet'):
+        if torch.is_tensor(matrix):
+            color_correlation_svd_sqrt = matrix
+        elif ',' in matrix:
+            m = [float(mx) for mx in matrix.split(',')]      
+            color_correlation_svd_sqrt = torch.Tensor([[m[0], m[1], m[2]],
+                                                      [m[3], m[4], m[5]],
+                                                      [m[6], m[7], m[8]]])
+        elif matrix.lower() == 'imagenet':
+            color_correlation_svd_sqrt = torch.Tensor([[0.26, 0.09, 0.02],
+                                                      [0.27, 0.00, -0.05],
+                                                      [0.27, -0.09, 0.03]])
+        elif matrix.lower() == 'places365':
+            color_correlation_svd_sqrt = torch.Tensor([[0.26, 0.09, 0.02], #Placeholder
+                                                      [0.27, 0.00, -0.05],
+                                                      [0.27, -0.09, 0.03]])
+        return color_correlation_svd_sqrt
+
+    def color_correlation_normalized(self, matrix):
+        color_correlation_svd_sqrt = self.get_matrix(matrix)
+        max_norm_svd_sqrt = torch.max(color_correlation_svd_sqrt.norm(0))
+        color_correlation_normalized = color_correlation_svd_sqrt / max_norm_svd_sqrt
+        return color_correlation_normalized.T		
+
+    def forward(self, input):
+        return torch.matmul(input.permute(0,2,3,1), self.color_correlation_n).permute(0,3,1,2)
 
 
 # Preprocess input after decorrelation
