@@ -81,7 +81,8 @@ def main_func(params):
     jit_mod = Jitter(params.jitter)
     mod_list = []
     if params.fft_decorrelation:
-        mod_list += get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device)
+        d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device)
+        mod_list += d_layers
     mod_list.append(jit_mod)
     prep_net = nn.Sequential(*mod_list)
 
@@ -111,7 +112,7 @@ def main_func(params):
     output_tensor = dream(net, input_tensor.clone(), params.num_iterations, params.lr, loss_modules, params.print_iter)
 
     if params.fft_decorrelation:
-        output_tensor = mod_list[1](mod_list[0](output_tensor))
+        output_tensor = deprocess_img(output_tensor)
 
     for batch_val in range(params.batch_size):
         simple_deprocess(output_tensor[batch_val], output_basename + '_c' + str(params.channel).zfill(4) + '_f' + str(batch_val).zfill(3)  + '_e' + str(model_epoch).zfill(3) + \
