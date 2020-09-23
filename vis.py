@@ -68,7 +68,7 @@ def main_func(params):
     jit_mod = Jitter(params.jitter)
     mod_list = []
     if params.fft_decorrelation:
-        mod_list += get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device)
+        d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device)
     mod_list.append(jit_mod)
     prep_net = nn.Sequential(*mod_list)
 
@@ -91,12 +91,12 @@ def main_func(params):
     output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.save_iter, \
                           params.print_iter, params.output_image, [params.data_mean, params.not_caffe], mod_list)
     if params.fft_decorrelation:
-        output_tensor = mod_list[1](mod_list[0](output_tensor))
+        output_tensor = deprocess_img(output_tensor)
     simple_deprocess(output_tensor, params.output_image, params.data_mean, params.not_caffe)
 
 
 # Function to maximize CNN activations
-def dream(net, img, iterations, lr, loss_modules, save_iter, print_iter, output_image, deprocess_info, mod_list):
+def dream(net, img, iterations, lr, loss_modules, save_iter, print_iter, output_image, deprocess_info, deprocess_img):
     filename, ext = os.path.splitext(output_image)
     img = nn.Parameter(img)
     optimizer = torch.optim.Adam([img], lr=lr)
@@ -113,7 +113,7 @@ def dream(net, img, iterations, lr, loss_modules, save_iter, print_iter, output_
 
         if save_iter > 0 and i > 0 and i % save_iter == 0:
             if len(mod_list) > 1:
-                simple_deprocess(mod_list[1](mod_list[0](img.detach())), filename + '_' + str(i) + \
+                simple_deprocess(deprocess_img(img.detach()), filename + '_' + str(i) + \
                                  ext, deprocess_info[0], deprocess_info[1])
             else:
                 simple_deprocess(img.detach(), filename + '_' + str(i) + ext, deprocess_info[0], deprocess_info[1])
