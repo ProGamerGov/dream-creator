@@ -117,6 +117,8 @@ class RandomScaleLayer(torch.nn.Module):
 
     def __init__(self, scale_list=(1, 0.975, 1.025, 0.95, 1.05)):
         super(RandomScaleLayer, self).__init__()
+        scale_list = (1, 0.975, 1.025, 0.95, 1.05) if scale_list == 'none' else scale_list
+        scale_list = [float(s) for s in scale_list.split(',')] if ',' in scale_list else scale_list 
         self.scale_list = scale_list
 
     def rescale_tensor(self, input, scale, align_corners=True):
