@@ -111,7 +111,11 @@ def print_model_vals(model):
         print('  Contains saved learning rate scheduler state')
     except:
         pass
-
+    try:
+        test = model['color_correlation_svd_sqrt']
+        print('  Contains saved color correlation matrix')
+    except:
+        pass
 
 
 if __name__ == "__main__":
