@@ -31,16 +31,15 @@ def main():
     parser.add_argument( "-lr", "-learning_rate", type=float, default=1.5)
     parser.add_argument("-num_iterations", type=int, default=500)
     parser.add_argument("-jitter", type=int, default=32)
-
+    parser.add_argument("-fft_decorrelation", action='store_true')
+    parser.add_argument("-color_decorrelation", help="", nargs="?", type=str, const="none")
+    parser.add_argument("-random_scale", help="", nargs="?", type=str, const="none")
+    
     # Other options
     parser.add_argument("-use_device", type=str, default='cuda:0')
     parser.add_argument("-not_caffe", action='store_true')
     parser.add_argument("-seed", type=int, default=-1)
     parser.add_argument("-no_branches", action='store_true')
-
-    parser.add_argument("-fft_decorrelation", action='store_true')
-    parser.add_argument("-color_decorrelation", help="", nargs="?", type=str, const="none")
-    parser.add_argument("-random_scale", help="", nargs="?", type=str, const="none")
     params = parser.parse_args()
     params.image_size = [int(m) for m in params.image_size.split(',')]
     main_func(params)
