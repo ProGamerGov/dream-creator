@@ -54,7 +54,7 @@ def main_calc(params):
         checkpoint['color_correlation_svd_sqrt'] = svd_sqrt
         if params.output_file == '':
             params.output_file = params.model_file
-        print('Saving color correlation matrix to ' + params.output_file)
+        print('\nSaving color correlation matrix to ' + params.output_file)
         torch.save(checkpoint, params.output_file)
 
 
