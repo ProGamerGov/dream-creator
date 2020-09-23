@@ -4,12 +4,12 @@ import torch.nn as nn
 
 
 # Helper function for returning deprocessing of decorrelated tensors
-def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='cpu', decay_power=0.75, decorrelate=[True,'none']):
+def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='cpu', decay_power=0.75, decorrelate=[True,None]):
     mod_list = []
     if decorrelate[0] == True:
         spatial_mod = SpatialDecorrelationLayer(image_size, decay_power=decay_power, device=device)
         mod_list.append(spatial_mod)
-    if decorrelate[1] != 'none':
+    if decorrelate[1] != None:
         if torch.is_tensor(decorrelate[1]):
             matrix = decorrelate[1]
         else:
@@ -19,11 +19,11 @@ def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='c
     transform_mod = TransformLayer(input_mean=input_mean, device=device)
     mod_list.append(transform_mod)
 
-    if decorrelate[0] == True and decorrelate[1] == 'none':
+    if decorrelate[0] == True and decorrelate[1] == None:
         deprocess_img = lambda x: transform_mod.forward(spatial_mod.forward(x)) 
-    elif decorrelate[0] == False and decorrelate[1] != 'none':
+    elif decorrelate[0] == False and decorrelate[1] != None:
         deprocess_img = lambda x: transform_mod.forward(color_mod.forward(x)) 
-    elif decorrelate[0] == True and decorrelate[1] != 'none':
+    elif decorrelate[0] == True and decorrelate[1] != None:
         deprocess_img = lambda x: transform_mod.forward(color_mod.forward(spatial_mod.forward(x))) 
     return mod_list, deprocess_img
 
