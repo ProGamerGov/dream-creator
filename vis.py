@@ -69,7 +69,7 @@ def main_func(params):
     # Preprocessing net layers
     mod_list = []
     if params.fft_decorrelation or params.color_decorrelation:
-        d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device \
+        d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device, \
                                                            decorrelate=(params.fft_decorrelation, params.color_decorrelation))
         mod_list += d_layers
     if params.random_scale:
