@@ -72,6 +72,8 @@ def main_func(params):
         d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device, \
                                                            decorrelate=(params.fft_decorrelation, params.color_decorrelation))
         mod_list += d_layers
+    else:
+        deprocess_img = None
     if params.random_scale:
         scale_mod = RandomScaleLayer(params.random_scale) 
         mod_list.append(scale_mod)
@@ -97,7 +99,7 @@ def main_func(params):
 
     # Create 224x224 image
     output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.save_iter, \
-                          params.print_iter, params.output_image, [params.data_mean, params.not_caffe], mod_list)
+                          params.print_iter, params.output_image, [params.data_mean, params.not_caffe], deprocess_img)
     if params.fft_decorrelation:
         output_tensor = deprocess_img(output_tensor)
     simple_deprocess(output_tensor, params.output_image, params.data_mean, params.not_caffe)
@@ -120,7 +122,7 @@ def dream(net, img, iterations, lr, loss_modules, save_iter, print_iter, output_
             print('Iteration', str(i) + ',', 'Loss', str(loss.item()))
 
         if save_iter > 0 and i > 0 and i % save_iter == 0:
-            if len(mod_list) > 1:
+            if deprocess_img != None:
                 simple_deprocess(deprocess_img(img.detach()), filename + '_' + str(i) + \
                                  ext, deprocess_info[0], deprocess_info[1])
             else:
