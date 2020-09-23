@@ -80,7 +80,7 @@ def main_func(params):
     # Preprocessing net layers
     mod_list = []
     if params.fft_decorrelation:
-        if params.color_decorrelation:
+        if params.color_decorrelation == 'none':
             try:
                 params.color_decorrelation = torch.load(params.model_file)['color_correlation_svd_sqrt']
             except:
