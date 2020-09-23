@@ -85,6 +85,8 @@ def main_func(params):
         d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device, \
                                                            decorrelate=(params.fft_decorrelation, params.color_decorrelation))
         mod_list += d_layers
+    else:
+        deprocess_img = None
     if params.random_scale:
         scale_mod = RandomScaleLayer(params.random_scale) 
         mod_list.append(scale_mod)
@@ -118,7 +120,7 @@ def main_func(params):
     print('Running optimization with ADAM\n')
     output_tensor = dream(net, input_tensor.clone(), params.num_iterations, params.lr, loss_modules, params.print_iter)
 
-    if params.fft_decorrelation:
+    if deprocess_img != None:
         output_tensor = deprocess_img(output_tensor)
 
     for batch_val in range(params.batch_size):
