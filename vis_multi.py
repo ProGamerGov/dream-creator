@@ -34,13 +34,13 @@ def main():
     parser.add_argument("-fft_decorrelation", action='store_true')
     parser.add_argument("-color_decorrelation", help="", nargs="?", type=str, const="none")
     parser.add_argument("-random_scale", nargs="?", type=str, const="none")
- 
+
     # Other options
     parser.add_argument("-use_device", type=str, default='cuda:0')
     parser.add_argument("-not_caffe", action='store_true')
     parser.add_argument("-seed", type=int, default=-1)
     parser.add_argument("-no_branches", action='store_true')
-    
+
     # Batch
     parser.add_argument("-batch_size", type=int, default=10)
     parser.add_argument("-start_channel", type=int, default=-1)
@@ -83,14 +83,14 @@ def main_func(params):
             try:
                 params.color_decorrelation = torch.load(params.model_file)['color_correlation_svd_sqrt']
             except:
-                pass        
+                pass
         d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device, \
                                                            decorrelate=(params.fft_decorrelation, params.color_decorrelation))
         mod_list += d_layers
     else:
         deprocess_img = None
     if params.random_scale:
-        scale_mod = RandomScaleLayer(params.random_scale) 
+        scale_mod = RandomScaleLayer(params.random_scale)
         mod_list.append(scale_mod)
     if params.jitter > 0:
         jit_mod = Jitter(params.jitter)

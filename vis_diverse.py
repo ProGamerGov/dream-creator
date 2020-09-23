@@ -92,7 +92,7 @@ def main_func(params):
     else:
         deprocess_img = None
     if params.random_scale:
-        scale_mod = RandomScaleLayer(params.random_scale) 
+        scale_mod = RandomScaleLayer(params.random_scale)
         mod_list.append(scale_mod)
     if params.jitter > 0:
         jit_mod = Jitter(params.jitter)

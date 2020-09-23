@@ -34,7 +34,7 @@ def main():
     parser.add_argument("-fft_decorrelation", action='store_true')
     parser.add_argument("-color_decorrelation", help="", nargs="?", type=str, const="none")
     parser.add_argument("-random_scale", help="", nargs="?", type=str, const="none")
-    
+
     # Other options
     parser.add_argument("-use_device", type=str, default='cuda:0')
     parser.add_argument("-not_caffe", action='store_true')
@@ -79,7 +79,7 @@ def main_func(params):
     else:
         deprocess_img = None
     if params.random_scale:
-        scale_mod = RandomScaleLayer(params.random_scale) 
+        scale_mod = RandomScaleLayer(params.random_scale)
         mod_list.append(scale_mod)
     if params.jitter > 0:
         jit_mod = Jitter(params.jitter)
