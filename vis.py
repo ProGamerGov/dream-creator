@@ -7,7 +7,7 @@ import torch.optim as optim
 
 from utils.inceptionv1_caffe import relu_to_redirected_relu
 from utils.vis_utils import preprocess, simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_simple_hook
-from utils.decorrelation import get_decorrelation_layers
+from utils.decorrelation import get_decorrelation_layers, RandomScaleLayer
 
 
 def main():
@@ -39,6 +39,7 @@ def main():
     parser.add_argument("-no_branches", action='store_true')
 
     parser.add_argument("-fft_decorrelation", action='store_true')
+    parser.add_argument("-random_scale", help="Optionally provide a comma separated list of image scales", nargs="?", type=str, const="none")
     params = parser.parse_args()
     params.image_size = [int(m) for m in params.image_size.split(',')]
     main_func(params)
@@ -65,12 +66,16 @@ def main_func(params):
         params.requires_grad = False
 
     # Preprocessing net layers
-    jit_mod = Jitter(params.jitter)
     mod_list = []
     if params.fft_decorrelation:
         d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device)
         mod_list += d_layers
-    mod_list.append(jit_mod)
+    if params.random_scale:
+        scale_mod = RandomScaleLayer() 
+        mod_list.append(scale_mod)
+    if params.jitter > 0:
+        jit_mod = Jitter(params.jitter)
+        mod_list.append(jit_mod)
     prep_net = nn.Sequential(*mod_list)
 
     # Full network
