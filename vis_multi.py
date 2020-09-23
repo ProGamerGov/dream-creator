@@ -39,6 +39,7 @@ def main():
     parser.add_argument("-no_branches", action='store_true')
 
     parser.add_argument("-fft_decorrelation", action='store_true')
+    parser.add_argument("-color_decorrelation", help="", nargs="?", type=str, const="none")
     parser.add_argument("-random_scale", nargs="?", type=str, const="none")
     
     # Batch
@@ -79,10 +80,11 @@ def main_func(params):
     # Preprocessing net layers
     mod_list = []
     if params.fft_decorrelation:
-        d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device)
+        d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device, \
+                                                           decorrelate=(params.fft_decorrelation, params.color_decorrelation))
         mod_list += d_layers
     if params.random_scale:
-        scale_mod = RandomScaleLayer() 
+        scale_mod = RandomScaleLayer(params.random_scale) 
         mod_list.append(scale_mod)
     if params.jitter > 0:
         jit_mod = Jitter(params.jitter)
