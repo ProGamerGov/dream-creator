@@ -6,7 +6,10 @@ import torch.nn as nn
 def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='cpu', decay_power=0.75):
     spatial_mod = SpatialDecorrelationLayer(image_size, decay_power=decay_power, device=device)
     transform_mod = TransformLayer(input_mean=input_mean, device=device)
-    return [spatial_mod, transform_mod]
+    
+    deprocess_img = lambda x: transform_mod.forward(spatial_mod.forward(x))
+    #deprocess_img = lambda x: x # If not using FFT
+    return [spatial_mod, transform_mod], deprocess_img
 
 
 # Spatial Decorrelation layer based on tensorflow/lucid & greentfrapp/lucent
@@ -58,3 +61,18 @@ class TransformLayer(torch.nn.Module):
     def forward(self, input):
         input = torch.sigmoid(input) * self.r
         return input.sub(self.input_mean[None, :, None, None]).div(self.input_sd[None, :, None, None])
+
+
+# Randomly scale an input
+class RandomScaleLayer(torch.nn.Module):
+
+    def __init__(self, scale_list=(1, 0.975, 1.025, 0.95, 1.05)):
+        super(RandomScaleLayer, self).__init__()
+        self.scale_list = scale_list
+
+    def rescale_tensor(self, input, scale, align_corners=True):
+        return torch.nn.functional.interpolate(input, scale_factor=scale, mode='bilinear', align_corners=align_corners)
+
+    def forward(self, input):
+        n = random.randint(0, len(self.scale_list)-1)
+        return self.rescale_tensor(input, scale=self.scale_list[n])
