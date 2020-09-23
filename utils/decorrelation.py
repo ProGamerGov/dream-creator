@@ -20,11 +20,11 @@ def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='c
     mod_list.append(transform_mod)
 
     if decorrelate[0] == True and decorrelate[1] == None:
-        deprocess_img = lambda x: transform_mod.forward(spatial_mod.forward(x)) 
+        deprocess_img = lambda x: transform_mod.forward(spatial_mod.forward(x))
     elif decorrelate[0] == False and decorrelate[1] != None:
-        deprocess_img = lambda x: transform_mod.forward(color_mod.forward(x)) 
+        deprocess_img = lambda x: transform_mod.forward(color_mod.forward(x))
     elif decorrelate[0] == True and decorrelate[1] != None:
-        deprocess_img = lambda x: transform_mod.forward(color_mod.forward(spatial_mod.forward(x))) 
+        deprocess_img = lambda x: transform_mod.forward(color_mod.forward(spatial_mod.forward(x)))
     return mod_list, deprocess_img
 
 
@@ -71,12 +71,12 @@ class ColorDecorrelationLayer(nn.Module):
     def __init__(self, correlation_matrix='imagenet', device='cpu'):
         super(ColorDecorrelationLayer, self).__init__()
         self.color_correlation_n = self.color_correlation_normalized(correlation_matrix).to(device)
-        
+
     def get_matrix(self, matrix='imagenet'):
         if torch.is_tensor(matrix):
             color_correlation_svd_sqrt = matrix
         elif ',' in matrix:
-            m = [float(mx) for mx in matrix.replace('n','-').split(',')]         
+            m = [float(mx) for mx in matrix.replace('n','-').split(',')]
             color_correlation_svd_sqrt = torch.Tensor([[m[0], m[1], m[2]],
                                                       [m[3], m[4], m[5]],
                                                       [m[6], m[7], m[8]]])
@@ -92,7 +92,7 @@ class ColorDecorrelationLayer(nn.Module):
         color_correlation_svd_sqrt = self.get_matrix(matrix)
         max_norm_svd_sqrt = torch.max(color_correlation_svd_sqrt.norm(0))
         color_correlation_normalized = color_correlation_svd_sqrt / max_norm_svd_sqrt
-        return color_correlation_normalized.T		
+        return color_correlation_normalized.T
 
     def forward(self, input):
         return torch.matmul(input.permute(0,2,3,1), self.color_correlation_n).permute(0,3,1,2)
@@ -118,7 +118,7 @@ class RandomScaleLayer(torch.nn.Module):
     def __init__(self, scale_list=(1, 0.975, 1.025, 0.95, 1.05)):
         super(RandomScaleLayer, self).__init__()
         scale_list = (1, 0.975, 1.025, 0.95, 1.05) if scale_list == 'none' else scale_list
-        scale_list = [float(s) for s in scale_list.split(',')] if ',' in scale_list else scale_list 
+        scale_list = [float(s) for s in scale_list.split(',')] if ',' in scale_list else scale_list
         self.scale_list = scale_list
 
     def rescale_tensor(self, input, scale, align_corners=True):
