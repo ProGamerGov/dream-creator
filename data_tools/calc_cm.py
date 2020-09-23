@@ -40,17 +40,19 @@ def main_calc(params):
     epsilon = 1e-10
     svd_sqrt = U @ torch.diag(torch.sqrt(S + epsilon))
 
-    print('Color correlation matrix')
+    print('Color correlation matrix\n')
     print(svd_sqrt)
     
-    print("\n-color_decorrelation " + '"' + str(round(svd_sqrt[0][0].item(), 4)) + ',' + str(round(svd_sqrt[0][1].item(), 4)) + ',' + str(round(svd_sqrt[0][2].item(), 4)) \
-          + ',' + str(round(svd_sqrt[1][0].item(), 4)) + ',' + str(round(svd_sqrt[1][1].item(), 4))  + ',' + str(round(svd_sqrt[1][2].item(), 4)) \
-          + ',' + str(round(svd_sqrt[2][0].item(), 4)) + ',' + str(round(svd_sqrt[2][1].item(), 4)) + ',' + str(round(svd_sqrt[2][2].item(), 4)) + '"')
+    print_string = "color_decorrelation " + '"' + str(round(svd_sqrt[0][0].item(), 4)) + ',' + str(round(svd_sqrt[0][1].item(), 4)) + ',' + str(round(svd_sqrt[0][2].item(), 4)) \
+                   + ',' + str(round(svd_sqrt[1][0].item(), 4)) + ',' + str(round(svd_sqrt[1][1].item(), 4))  + ',' + str(round(svd_sqrt[1][2].item(), 4)) \
+                   + ',' + str(round(svd_sqrt[2][0].item(), 4)) + ',' + str(round(svd_sqrt[2][1].item(), 4)) + ',' + str(round(svd_sqrt[2][2].item(), 4)) + '"'
+                   
+    print("\n-" + print_string.replace('-', 'n'))
 
     if params.model_file != '':
         checkpoint = torch.load(params.model_file, map_location='cpu')
         checkpoint['color_correlation_svd_sqrt'] = svd_sqrt
-        if params.output_file == ''
+        if params.output_file == '':
             params.output_file = params.model_file
         print('Saving color correlation matrix to ' + params.output_file)
         torch.save(checkpoint, params.output_file)
