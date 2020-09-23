@@ -8,7 +8,7 @@ All of these scripts with the exception of `sort_images.py` can be copied to and
 1. [Dataset Tools](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#dataset-tools)
 
    1. [Dataset Mean and Standard Deviation Calculation](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#dataset-mean-and-standard-deviation-calculation)
-   
+
    2. [Dataset RGB Covariance Matrix Calculation](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#dataset-rgb-covariance-matrix-calculation)
 
    3. [FC Channel Contents](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#fc-channel-contents)
