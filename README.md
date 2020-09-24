@@ -38,7 +38,7 @@ Dependencies:
 
 You can find detailed installation instructions for Ubuntu and Windows in the [installation guide](INSTALL.md).
 
-After making sure that PyTorch is installed, you can optionally download the Places365 GoogleNet and Inception5h (InceptionV1) pretrained models for finetuning:
+After making sure that PyTorch is installed, you can optionally download the Places365 GoogleNet and Inception5h (InceptionV1) pretrained models with the following command:
 
 ```
 python models/download_models.py
