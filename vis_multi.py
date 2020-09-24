@@ -196,7 +196,7 @@ def get_num_channels(test_net, layer, test_tensor):
     with torch.no_grad():
         test_net(test_tensor.unsqueeze(0))
     num_channels = channel_catcher[0].size
-    return num_channels[1], len(num_channels)
+    return num_channels[1]
 
 
 def register_hook_batch_selective(net, layer_name, loss_func=mean_loss, neuron=False):
