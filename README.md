@@ -31,6 +31,22 @@ Here are some example visualizations created with custom DeepDream models traine
 
 ---
 
+## Setup:
+
+Dependencies:
+* [PyTorch](http://pytorch.org/)
+
+You can find detailed installation instructions for Ubuntu and Windows in the [installation guide](INSTALL.md).
+
+After making sure that PyTorch is installed, you can optionally download the Places365 GoogleNet and Inception5h (InceptionV1) pretrained models for finetuning:
+
+```
+python models/download_models.py
+```
+
+If you just want to create DeepDreams with the pretrained models or you downloaded a pretrained model made by someone else with Dream-Creator, then you can skip ahead to [visualizing models](https://github.com/ProGamerGov/dream-creator#visualizing-results).
+
+
 # Getting Started
 
 1. [Create & Prepare Your Dataset](https://github.com/ProGamerGov/dream-creator#dataset-creation)
@@ -55,13 +71,6 @@ Here are some example visualizations created with custom DeepDream models traine
 
 It can take as little as 5 epochs to create visualizations that resemble your training data using the main FC/Logits layer. In order to speed up training and create better looking results, the pretrained BVLC model used is partially frozen in order to protect the lower layers from changing.
 
-
-## Setup:
-
-Dependencies:
-* [PyTorch](http://pytorch.org/)
-
-You can find detailed installation instructions for Ubuntu and Windows in the [installation guide](INSTALL.md).
 
 ---
 
