@@ -18,6 +18,7 @@ def main():
     parser.add_argument("-num_classes", type=int, default=120)
     parser.add_argument("-data_mean", type=str, default='')
     parser.add_argument("-layer", type=str, default='fc')
+    parser.add_argument("-extract_neuron", action='store_true')
     parser.add_argument("-model_file", type=str, default='')
     parser.add_argument("-image_size", type=str, default='224,224')
 
@@ -111,7 +112,7 @@ def main_func(params):
 
     # Loss module setup
     loss_func = mean_loss
-    loss_modules = register_hook_batch_selective(net.net, params.layer, loss_func=loss_func)
+    loss_modules = register_hook_batch_selective(net.net, params.layer, loss_func=loss_func, neuron=params.extract_neuron)
     loss_modules[0].layer_dim = layer_dim
 
     # Stack basic inputs into batch
@@ -198,20 +199,20 @@ def get_num_channels(test_net, layer, test_tensor):
     return num_channels[1], len(num_channels)
 
 
-def register_hook_batch_selective(net, layer_name, loss_func=mean_loss):
-    loss_module = SimpleDreamLossHookChannels(loss_func)
+def register_hook_batch_selective(net, layer_name, loss_func=mean_loss, neuron=False):
+    loss_module = SimpleDreamLossHookChannels(loss_func, neuron=neuron)
     return register_layer_hook(net, layer_name, loss_module)
 
 
 # Define a simple forward hook to collect DeepDream loss for multiple channels
 class SimpleDreamLossHookChannels(torch.nn.Module):
-    def __init__(self, loss_func=mean_loss):
+    def __init__(self, loss_func=mean_loss, neuron=False):
         super(SimpleDreamLossHookChannels, self).__init__()
         self.get_loss = loss_func
         self.channel_start = 0
         self.channel_end = 0
         self.layer_dim = 2
-        self.get_neuron = False
+        self.get_neuron = neuron
 
     def forward(self, module, input, output):
         output = self.extract_neuron(output) if self.get_neuron == True else output
