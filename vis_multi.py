@@ -18,6 +18,7 @@ def main():
     parser.add_argument("-num_classes", type=int, default=120)
     parser.add_argument("-data_mean", type=str, default='')
     parser.add_argument("-layer", type=str, default='fc')
+    parser.add_argument("-extract_neuron", action='store_true')
     parser.add_argument("-model_file", type=str, default='')
     parser.add_argument("-image_size", type=str, default='224,224')
 
@@ -32,6 +33,7 @@ def main():
     parser.add_argument("-num_iterations", type=int, default=500)
     parser.add_argument("-jitter", type=int, default=32)
     parser.add_argument("-fft_decorrelation", action='store_true')
+    parser.add_argument("-decay_power", type=float, default=1.0)
     parser.add_argument("-color_decorrelation", help="", nargs="?", type=str, const="none")
     parser.add_argument("-random_scale", nargs="?", type=str, const="none")
 
@@ -85,7 +87,7 @@ def main_func(params):
             except:
                 pass
         d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device, \
-                                                           decorrelate=(params.fft_decorrelation, params.color_decorrelation))
+                                                           decorrelate=(params.fft_decorrelation, params.color_decorrelation), decay_power=params.decay_power)
         mod_list += d_layers
     else:
         deprocess_img = None
@@ -107,12 +109,11 @@ def main_func(params):
         input_tensor = torch.randn(3, *params.image_size).to(params.use_device) * 0.01
 
     # Determine how many visualizations to generate
-    num_channels, layer_dim = get_num_channels(deepcopy(cnn), params.layer, input_tensor.detach())
+    num_channels = get_num_channels(deepcopy(cnn), params.layer, input_tensor.detach())
 
     # Loss module setup
     loss_func = mean_loss
-    loss_modules = register_hook_batch_selective(net.net, params.layer, loss_func=loss_func)
-    loss_modules[0].layer_dim = layer_dim
+    loss_modules = register_hook_batch_selective(net.net, params.layer, loss_func=loss_func, neuron=params.extract_neuron)
 
     # Stack basic inputs into batch
     input_tensor_list = []
@@ -195,32 +196,31 @@ def get_num_channels(test_net, layer, test_tensor):
     with torch.no_grad():
         test_net(test_tensor.unsqueeze(0))
     num_channels = channel_catcher[0].size
-    return num_channels[1], len(num_channels)
+    return num_channels[1]
 
 
-def register_hook_batch_selective(net, layer_name, loss_func=mean_loss):
-    loss_module = SimpleDreamLossHookChannels(loss_func)
+def register_hook_batch_selective(net, layer_name, loss_func=mean_loss, neuron=False):
+    loss_module = SimpleDreamLossHookChannels(loss_func, neuron=neuron)
     return register_layer_hook(net, layer_name, loss_module)
 
 
 # Define a simple forward hook to collect DeepDream loss for multiple channels
 class SimpleDreamLossHookChannels(torch.nn.Module):
-    def __init__(self, loss_func=mean_loss):
+    def __init__(self, loss_func=mean_loss, neuron=False):
         super(SimpleDreamLossHookChannels, self).__init__()
         self.get_loss = loss_func
         self.channel_start = 0
         self.channel_end = 0
-        self.layer_dim = 2
-        self.get_neuron = False
+        self.get_neuron = neuron
 
     def forward(self, module, input, output):
         output = self.extract_neuron(output) if self.get_neuron == True else output
         vis_list = list(range(self.channel_start, self.channel_end))
         loss = 0
         for i in range(0, len(vis_list)):
-            if self.layer_dim == 2:
+            if output.dim() == 2:
                 loss = loss + self.get_loss(output[i, vis_list[i]])
-            elif self.layer_dim == 4:
+            elif output.dim() == 4:
                 loss = loss + self.get_loss(output[i, vis_list[i], :, :])
         self.loss = -loss
 

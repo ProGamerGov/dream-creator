@@ -32,6 +32,7 @@ def main():
     parser.add_argument("-num_iterations", type=int, default=500)
     parser.add_argument("-jitter", type=int, default=32)
     parser.add_argument("-fft_decorrelation", action='store_true')
+    parser.add_argument("-decay_power", type=float, default=1.0)
     parser.add_argument("-color_decorrelation", help="", nargs="?", type=str, const="none")
     parser.add_argument("-random_scale", help="", nargs="?", type=str, const="none")
 
@@ -74,7 +75,7 @@ def main_func(params):
             except:
                 pass
         d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device, \
-                                                           decorrelate=(params.fft_decorrelation, params.color_decorrelation))
+                                                           decorrelate=(params.fft_decorrelation, params.color_decorrelation), decay_power=params.decay_power)
         mod_list += d_layers
     else:
         deprocess_img = None
