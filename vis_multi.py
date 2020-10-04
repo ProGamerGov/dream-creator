@@ -8,7 +8,7 @@ from copy import deepcopy
 
 from utils.inceptionv1_caffe import relu_to_redirected_relu
 from utils.vis_utils import simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_layer_hook
-from utils.decorrelation import get_decorrelation_layers, RandomScaleLayer
+from utils.decorrelation import get_decorrelation_layers, RandomScaleLayer, RandomRotationLayer
 
 
 def main():
@@ -36,6 +36,7 @@ def main():
     parser.add_argument("-decay_power", type=float, default=1.0)
     parser.add_argument("-color_decorrelation", help="", nargs="?", type=str, const="none")
     parser.add_argument("-random_scale", nargs="?", type=str, const="none")
+    parser.add_argument("-random_rotation", help="", nargs="?", type=str, const="none")
 
     # Other options
     parser.add_argument("-use_device", type=str, default='cuda:0')
@@ -94,6 +95,9 @@ def main_func(params):
     if params.random_scale:
         scale_mod = RandomScaleLayer(params.random_scale)
         mod_list.append(scale_mod)
+    if params.random_scale:
+        rot_mod = RandomRotationLayer(params.random_rotation)
+        mod_list.append(rot_mod)
     if params.jitter > 0:
         jit_mod = Jitter(params.jitter)
         mod_list.append(jit_mod)
