@@ -127,3 +127,29 @@ class RandomScaleLayer(torch.nn.Module):
     def forward(self, input):
         n = random.randint(0, len(self.scale_list)-1)
         return self.rescale_tensor(input, scale=self.scale_list[n])
+
+
+# Randomly rotate a tensor from a list of degrees
+class RandomRotationLayer(torch.nn.Module):
+
+    def __init__(self, r_degrees=5):
+        super(RandomRotationLayer, self).__init__()      
+        self.angle_range = list(range(-r_degrees, r_degrees)) if r_degrees is not list and r_degrees is not tuple else r_degrees
+
+    def get_random_angle(self):
+        n = random.randint(self.angle_range[0], self.angle_range[len(self.angle_range)-1])
+        return self.angle_range[n] * math.pi / 180
+
+    def get_rot_mat(self, theta):
+        theta = torch.tensor(theta).float()
+        return torch.tensor([[torch.cos(theta), -torch.sin(theta), 0],
+                            [torch.sin(theta), torch.cos(theta), 0]]).float()
+
+    def rotate_tensor(self, x, theta):
+        rotation_matrix = get_rot_mat(theta)[None, ...].to(device=x.device)
+        grid = F.affine_grid(rotation_matrix, x.size()).to(device=x.device)
+        return F.grid_sample(x, grid)
+
+    def forward(self, input):
+        rnd_angle = self.get_random_angle()
+        return self.rotate_tensor(input, rnd_angle)
