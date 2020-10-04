@@ -1,5 +1,4 @@
 import random
-import math
 import torch
 import torch.nn as nn
 
@@ -141,7 +140,7 @@ class RandomRotationLayer(torch.nn.Module):
 
     def get_random_angle(self):
         n = random.randint(self.angle_range[0], self.angle_range[len(self.angle_range)-1])
-        return self.angle_range[n] * math.pi / 180
+        return self.angle_range[n] * 3.141592653589793 / 180
 
     def get_rot_mat(self, theta):
         theta = torch.tensor(theta).float()
