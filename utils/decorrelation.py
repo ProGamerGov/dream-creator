@@ -135,7 +135,7 @@ class RandomRotationLayer(torch.nn.Module):
     def __init__(self, r_degrees=5):
         super(RandomRotationLayer, self).__init__()
         r_degrees = 5 if r_degrees == 'none' else r_degrees
-        r_degrees = [float(r) for r in r_degrees.split(',')] if ',' in r_degrees else r_degrees   
+        r_degrees = [float(r) for r in r_degrees.split(',')] if ',' in r_degrees else float(r_degrees)   
         self.angle_range = list(range(-r_degrees, r_degrees)) if r_degrees is not list and r_degrees is not tuple else r_degrees
 
     def get_random_angle(self):
