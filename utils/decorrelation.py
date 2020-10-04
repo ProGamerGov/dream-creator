@@ -115,10 +115,11 @@ class TransformLayer(torch.nn.Module):
 # Randomly scale an input
 class RandomScaleLayer(torch.nn.Module):
 
-    def __init__(self, scale_list=(1, 0.975, 1.025, 0.95, 1.05)):
+    def __init__(self, s_list=(1, 0.975, 1.025, 0.95, 1.05)):
         super(RandomScaleLayer, self).__init__()
-        scale_list = (1, 0.975, 1.025, 0.95, 1.05) if scale_list == 'none' else scale_list
-        scale_list = [float(s) for s in scale_list.split(',')] if ',' in scale_list else float(scale_list)
+        scale_list = float(s_list) if s_list != 'none' and ',' not in s_list else s_list 
+        scale_list = (1, 0.975, 1.025, 0.95, 1.05) if s_list == 'none' else scale_list
+        scale_list = [float(s) for s in scale_list.split(',')] if ',' in scale_list else scale_list
         self.scale_list = scale_list
 
     def rescale_tensor(self, input, scale, align_corners=True):
@@ -134,8 +135,9 @@ class RandomRotationLayer(torch.nn.Module):
 
     def __init__(self, r_degrees=5):
         super(RandomRotationLayer, self).__init__()
-        r_degrees = 5 if r_degrees == 'none' else r_degrees
-        r_degrees = [float(r) for r in r_degrees.split(',')] if ',' in r_degrees else float(r_degrees)   
+        range_degrees = float(r_degrees) if r_degrees != 'none' and ',' not in r_degrees else r_degrees 
+        range_degrees = 5 if r_degrees == 'none' else range_degrees
+        range_degrees = [float(r) for r in range_degrees.split(',')] if ',' in range_degrees else range_degrees 
         self.angle_range = list(range(-r_degrees, r_degrees)) if r_degrees is not list and r_degrees is not tuple else r_degrees
 
     def get_random_angle(self):
