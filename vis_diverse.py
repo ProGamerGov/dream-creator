@@ -104,7 +104,7 @@ def main_func(params):
     if params.random_scale:
         scale_mod = RandomScaleLayer(params.random_scale)
         mod_list.append(scale_mod)
-    if params.random_scale:
+    if params.random_rotation:
         rot_mod = RandomRotationLayer(params.random_rotation)
         mod_list.append(rot_mod)
     if len(params.jitter) > 1:
