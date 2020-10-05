@@ -139,7 +139,6 @@ class RandomRotationLayer(torch.nn.Module):
             self.angle_range = [int(r) for r in range_degrees.replace('n','-').split(',')]
         else:
             self.angle_range = list(range(-int(range_degrees), int(range_degrees) + 1))
-        print(self.angle_range)
 
     def get_random_angle(self):
         n = random.randint(0, len(self.angle_range) -1)
