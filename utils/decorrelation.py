@@ -157,3 +157,18 @@ class RandomRotationLayer(torch.nn.Module):
     def forward(self, input):
         rnd_angle = self.get_random_angle()
         return self.rotate_tensor(input, rnd_angle)
+
+
+# Crop the padding off a tensor
+class CenterCropLayer(torch.nn.Module):
+
+    def __init__(self, crop_val=0):
+        super(CenterCropLayer, self).__init__()
+        self.crop_val = crop_val
+
+    def forward(self, input):
+       h, w = input.size(2), input.size(3)
+       h_crop = input.size(2) - self.crop_val
+       w_crop = input.size(3) - self.crop_val
+       sw, sh = w // 2 - (w_crop // 2), h // 2 - (h_crop // 2)
+       return input[:, :, sh:sh + h_crop, sw:sw + w_crop]
