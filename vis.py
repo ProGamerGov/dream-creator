@@ -7,7 +7,7 @@ import torch.optim as optim
 
 from utils.inceptionv1_caffe import relu_to_redirected_relu
 from utils.vis_utils import preprocess, simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_simple_hook
-from utils.decorrelation import get_decorrelation_layers, RandomScaleLayer, RandomRotationLayer
+from utils.decorrelation import get_decorrelation_layers, RandomScaleLayer, RandomRotationLayer, CenterCropLayer
 
 
 def main():
@@ -36,7 +36,8 @@ def main():
     parser.add_argument("-color_decorrelation", help="", nargs="?", type=str, const="none")
     parser.add_argument("-random_scale", help="", nargs="?", type=str, const="none")
     parser.add_argument("-random_rotation", help="", nargs="?", type=str, const="none")
-
+    parser.add_argument("-padding", type=int, default=0)
+ 
     # Other options
     parser.add_argument("-use_device", type=str, default='cuda:0')
     parser.add_argument("-not_caffe", action='store_true')
@@ -80,15 +81,24 @@ def main_func(params):
         mod_list += d_layers
     else:
         deprocess_img = None
+    if params.padding > 0:
+        pad_mod = nn.ReflectionPad2d(params.padding)
+        mod_list.append(pad_mod)
+    if params.jitter > 0:
+        jit_mod = Jitter(params.jitter)
+        mod_list.append(jit_mod)        
     if params.random_scale:
         scale_mod = RandomScaleLayer(params.random_scale)
         mod_list.append(scale_mod)
     if params.random_scale:
         rot_mod = RandomRotationLayer(params.random_rotation)
-        mod_list.append(rot_mod) 
-    if params.jitter > 0:
-        jit_mod = Jitter(params.jitter)
-        mod_list.append(jit_mod)
+        mod_list.append(rot_mod)
+    #if params.jitter > 0:
+    #    jit_mod_two = Jitter(params.jitter)
+    #    mod_list.append(jit_mod_two)        
+    if params.padding > 0:       
+        crop_mod = CenterCropLayer(params.padding)
+        mod_list.append(crop_mod) 
     prep_net = nn.Sequential(*mod_list)
 
     # Full network
