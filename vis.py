@@ -30,7 +30,7 @@ def main():
     # Optimization options
     parser.add_argument( "-lr", "-learning_rate", type=float, default=1.5)
     parser.add_argument("-num_iterations", type=int, default=500)
-    parser.add_argument("-jitter", type=int, default=32)
+    parser.add_argument("-jitter", type=str, default='16')
     parser.add_argument("-fft_decorrelation", action='store_true')
     parser.add_argument("-decay_power", type=float, default=1.0)
     parser.add_argument("-color_decorrelation", help="", nargs="?", type=str, const="none")
@@ -84,8 +84,9 @@ def main_func(params):
     if params.padding > 0:
         pad_mod = nn.ReflectionPad2d(params.padding)
         mod_list.append(pad_mod)
-    if params.jitter > 0:
-        jit_mod = Jitter(params.jitter)
+    params.jitter = [int(j) for j in params.jitter.split(',')]
+    if params.jitter[0] > 0:
+        jit_mod = Jitter(params.jitter[0])
         mod_list.append(jit_mod)        
     if params.random_scale:
         scale_mod = RandomScaleLayer(params.random_scale)
@@ -93,9 +94,9 @@ def main_func(params):
     if params.random_scale:
         rot_mod = RandomRotationLayer(params.random_rotation)
         mod_list.append(rot_mod)
-    #if params.jitter > 0:
-    #    jit_mod_two = Jitter(params.jitter)
-    #    mod_list.append(jit_mod_two)        
+    if len(params.jitter) > 1:
+        jit_mod = Jitter(params.jitter[1])
+        mod_list.append(jit_mod)        
     if params.padding > 0:       
         crop_mod = CenterCropLayer(params.padding)
         mod_list.append(crop_mod) 
