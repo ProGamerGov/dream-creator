@@ -150,7 +150,7 @@ class RandomRotationLayer(torch.nn.Module):
                             [torch.sin(theta), torch.cos(theta), 0]]).float()
 
     def rotate_tensor(self, x, theta):
-        rotation_matrix = get_rot_mat(theta)[None, ...].to(device=x.device)
+        rotation_matrix = self.get_rot_mat(theta)[None, ...].to(device=x.device).repeat(x.shape[0],1,1)
         grid = F.affine_grid(rotation_matrix, x.size()).to(device=x.device)
         return F.grid_sample(x, grid)
 
