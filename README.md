@@ -220,6 +220,12 @@ Basic FC (logits) layer visualization:
 python vis_multi.py -model_file <bvlc_out120>.pth
 ```
 
+Advanced FC (logits) layer visualization:
+
+```
+python vis_multi.py -model_file <model_file>.pth -layer fc -color_decorrelation -fft_decorrelation -random_scale -random_rotation -lr 0.4 -output_dir <output_dir> -padding 16 -jitter 16,8
+```
+
 ---
 
 ## Performing DeepDream With Your Newly Trained Model
