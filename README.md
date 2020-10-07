@@ -193,7 +193,7 @@ After training a new DeepDream model, you'll need to test it's visualizations. T
 * `-color_decorrelation`: Whether or not to use color decorrelation. Optionally provide a comma separated list of values for the color correlation matrix. If no values are provided, an attempt to load a color correlation matrix from the model file will be made before defaulting to the ImageNet color correlation matrix.
 * `-random_scale`: Whether or not to use random scaling. Optionally provide a comma separated list of values for scales to be randomly selected from. If no values are provided, then scales will be randomly selected from the following list: `1, 0.975, 1.025, 0.95, 1.05`.
 * `-random_rotation`: Whether or not to use random rotations. Optionally provide a comma separated list of degree values for rotations to be randomly selected from or a single value to use for randomly selecting degrees from `[-value, value]`. If no values are provided, then a range of `[-5, 5]` wil be used.
-* `-padding`: The amount of padding to use before random scaling and random rotations. The padding is then removed after the transforms. Default is set to `0` to disable it.
+* `-padding`: The amount of padding to use before random scaling and random rotations to prevent edge artifacts. The padding is then removed after the transforms. Default is set to `0` to disable it.
 
 **Processing options:**
 * `-batch_size`: How many channel visualization images to create in each batch. Default is `10`.
@@ -247,7 +247,7 @@ This script lets you create DeepDream hallucinations with trained GoogleNet mode
 * `-color_decorrelation`: Whether or not to use color decorrelation. Optionally provide a comma separated list of values for the color correlation matrix. If no values are provided, an attempt to load a color correlation matrix from the model file will be made before defaulting to the ImageNet color correlation matrix.
 * `-random_scale`: Whether or not to use random scaling. Optionally provide a comma separated list of values for scales to be randomly selected from. If no values are provided, then scales will be randomly selected from the following list: `1, 0.975, 1.025, 0.95, 1.05`.
 * `-random_rotation`: Whether or not to use random rotations. Optionally provide a comma separated list of degree values for rotations to be randomly selected from or a single value to use for randomly selecting degrees from `[-value, value]`. If no values are provided, then a range of `[-5, 5]` wil be used.
-* `-padding`: The amount of padding to use before random scaling and random rotations. The padding is then removed after the transforms. Default is set to `0` to disable it.
+* `-padding`: The amount of padding to use before random scaling and random rotations to prevent edge artifacts. The padding is then removed after the transforms. Default is set to `0` to disable it.
 
 **Only Required If Model Doesn't Contain Them, Options**:
 * `-data_mean`: Your precalculated list of mean values that was used to train the model, if they weren't saved inside the model.
