@@ -144,13 +144,13 @@ class RandomRotationLayer(torch.nn.Module):
         n = random.randint(0, len(self.angle_range) -1)
         return self.angle_range[n] * 3.141592653589793 / 180
 
-    def get_rot_mat(self, theta, device):
-        theta = torch.tensor(theta, device=device).float()
+    def get_rot_mat(self, theta, device, dtype):
+        theta = torch.tensor(theta, device=device, dtype=dtype)
         return torch.tensor([[torch.cos(theta), -torch.sin(theta), 0],
-                            [torch.sin(theta), torch.cos(theta), 0]], device=device).float()
+                            [torch.sin(theta), torch.cos(theta), 0]], device=device, dtype=dtype)
 
     def rotate_tensor(self, x, theta):
-        rotation_matrix = self.get_rot_mat(theta, x.device)[None, ...].repeat(x.shape[0],1,1)
+        rotation_matrix = self.get_rot_mat(theta, x.device, x.dtype)[None, ...].repeat(x.shape[0],1,1)
         grid = F.affine_grid(rotation_matrix, x.size())
         return F.grid_sample(x, grid)
 
