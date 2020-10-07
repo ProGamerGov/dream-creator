@@ -100,7 +100,7 @@ def main_func(params):
     params.jitter = [int(j) for j in params.jitter.split(',')]
     if params.jitter[0] > 0:
         jit_mod = Jitter(params.jitter[0])
-        mod_list.append(jit_mod)        
+        mod_list.append(jit_mod)
     if params.random_scale:
         scale_mod = RandomScaleLayer(params.random_scale)
         mod_list.append(scale_mod)
@@ -109,10 +109,10 @@ def main_func(params):
         mod_list.append(rot_mod)
     if len(params.jitter) > 1:
         jit_mod_two = Jitter(params.jitter[1])
-        mod_list.append(jit_mod_two)        
-    if params.padding > 0:       
+        mod_list.append(jit_mod_two)
+    if params.padding > 0:
         crop_mod = CenterCropLayer(params.padding)
-        mod_list.append(crop_mod) 
+        mod_list.append(crop_mod)
     prep_net = nn.Sequential(*mod_list)
 
     # Full network
