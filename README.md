@@ -190,9 +190,9 @@ After training a new DeepDream model, you'll need to test it's visualizations. T
 * `-image_size`: A comma separated list of `<height>,<width>` to use for the output image. Default is set to `224,224`.
 * `-jitter`: The amount of image jitter to use for preprocessing. Default is `16`.
 * `-fft_decorrelation`: Whether or not to use FFT spatial decorrelation. If enabled, a lower learning rate should be used.
-* `-color_decorrelation`: Whether or not to use color decorrelation. Optionally provide a comma separated list of values for the color correlation matrix.
-* `-random_scale`: Whether or not to use random scaling. Optionally provide a comma separated list of values for scales to be randomly selected from.
-* `-random_rotation`: Whether or not to use random rotations. Optionally provide a comma separated list of values for rotations to be randomly selected from.
+* `-color_decorrelation`: Whether or not to use color decorrelation. Optionally provide a comma separated list of values for the color correlation matrix. If no values are provided, an attempt to load a color recorrelation matrix from the model file will be made before defaulting to the ImageNet color recorrelation matrix.
+* `-random_scale`: Whether or not to use random scaling. Optionally provide a comma separated list of values for scales to be randomly selected from. If no values are provided, then scales will be randomly selected from the following list: `1, 0.975, 1.025, 0.95, 1.05`.
+* `-random_rotation`: Whether or not to use random rotations. Optionally provide a comma separated list of degree values for rotations to be randomly selected from or a single value to use for randomly selecting degrees from `(-value, value)`. If no values are provided, then a range of `-5` to `5` wil be used.
 * `-padding`: The amount of padding to use before random scaling and random rotations. The padding is then removed after the transforms. Default is set to `0` to disable it.
 
 **Processing options:**
@@ -238,9 +238,9 @@ This script lets you create DeepDream hallucinations with trained GoogleNet mode
 * `-image_size`: A comma separated list of `<height>,<width>` to use for the output image. Default is set to `224,224`.
 * `-jitter`: The amount of image jitter to use for preprocessing. Default is `16`.
 * `-fft_decorrelation`: Whether or not to use FFT spatial decorrelation. If enabled, a lower learning rate should be used.
-* `-color_decorrelation`: Whether or not to use color decorrelation. Optionally provide a comma separated list of values for the color correlation matrix.
-* `-random_scale`: Whether or not to use random scaling. Optionally provide a comma separated list of values for scales to be randomly selected from.
-* `-random_rotation`: Whether or not to use random rotations. Optionally provide a comma separated list of values for rotations to be randomly selected from.
+* `-color_decorrelation`: Whether or not to use color decorrelation. Optionally provide a comma separated list of values for the color correlation matrix. If no values are provided, an attempt to load a color recorrelation matrix from the model file will be made before defaulting to the ImageNet color recorrelation matrix.
+* `-random_scale`: Whether or not to use random scaling. Optionally provide a comma separated list of values for scales to be randomly selected from. If no values are provided, then scales will be randomly selected from the following list: `1, 0.975, 1.025, 0.95, 1.05`.
+* `-random_rotation`: Whether or not to use random rotations. Optionally provide a comma separated list of degree values for rotations to be randomly selected from or a single value to use for randomly selecting degrees from `(-value, value)`. If no values are provided, then a range of `-5` to `5` wil be used.
 * `-padding`: The amount of padding to use before random scaling and random rotations. The padding is then removed after the transforms. Default is set to `0` to disable it.
 
 **Only Required If Model Doesn't Contain Them, Options**:
