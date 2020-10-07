@@ -206,7 +206,7 @@ After training a new DeepDream model, you'll need to test it's visualizations. T
 * `-num_classes`: The number of classes that the model was trained on. Default is `120`.
 
 **Output options**:
-* `-output_dir`: Where to save output images. Default is set to current working directory.
+* `-output_dir`: Where to save output images. Default is set to the current working directory.
 * `-print_iter`: Print progress every `print_iter` iterations. Set to `0` to disable printing.
 * `-save_iter`: Save the images every `save_iter` iterations. Default is to `0` to disable saving intermediate results.
 
