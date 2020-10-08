@@ -1,6 +1,7 @@
 import random
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 # Helper function for returning deprocessing of decorrelated tensors
@@ -127,3 +128,48 @@ class RandomScaleLayer(torch.nn.Module):
     def forward(self, input):
         n = random.randint(0, len(self.scale_list)-1)
         return self.rescale_tensor(input, scale=self.scale_list[n])
+
+
+# Randomly rotate a tensor from a list of degrees
+class RandomRotationLayer(torch.nn.Module):
+
+    def __init__(self, range_degrees=5):
+        super(RandomRotationLayer, self).__init__()
+        range_degrees = '5' if range_degrees == 'none' else range_degrees
+        if range_degrees is not int and ',' in range_degrees:
+            self.angle_range = [int(r) for r in range_degrees.replace('n','-').split(',')]
+        else:
+            self.angle_range = list(range(-int(range_degrees), int(range_degrees) + 1))
+
+    def get_random_angle(self):
+        n = random.randint(0, len(self.angle_range) -1)
+        return self.angle_range[n] * 3.141592653589793 / 180
+
+    def get_rot_mat(self, theta, device, dtype):
+        theta = torch.tensor(theta, device=device, dtype=dtype)
+        return torch.tensor([[torch.cos(theta), -torch.sin(theta), 0],
+                            [torch.sin(theta), torch.cos(theta), 0]], device=device, dtype=dtype)
+
+    def rotate_tensor(self, x, theta):
+        rotation_matrix = self.get_rot_mat(theta, x.device, x.dtype)[None, ...].repeat(x.shape[0],1,1)
+        grid = F.affine_grid(rotation_matrix, x.size())
+        return F.grid_sample(x, grid)
+
+    def forward(self, input):
+        rnd_angle = self.get_random_angle()
+        return self.rotate_tensor(input, rnd_angle)
+
+
+# Crop the padding off a tensor
+class CenterCropLayer(torch.nn.Module):
+
+    def __init__(self, crop_val=0):
+        super(CenterCropLayer, self).__init__()
+        self.crop_val = crop_val
+
+    def forward(self, input):
+        h, w = input.size(2), input.size(3)
+        h_crop = input.size(2) - self.crop_val
+        w_crop = input.size(3) - self.crop_val
+        sw, sh = w // 2 - (w_crop // 2), h // 2 - (h_crop // 2)
+        return input[:, :, sh:sh + h_crop, sw:sw + w_crop]

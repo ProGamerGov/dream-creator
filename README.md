@@ -188,10 +188,12 @@ After training a new DeepDream model, you'll need to test it's visualizations. T
 * `-layer`: The specific layer you wish to use. Default is set to `fc`.
 * `-extract_neuron`: If this flag is enabled, the center neuron will be extracted from each channel.
 * `-image_size`: A comma separated list of `<height>,<width>` to use for the output image. Default is set to `224,224`.
-* `-jitter`: The amount of image jitter to use for preprocessing. Default is `32`.
+* `-jitter`: The amount of image jitter to use for preprocessing. Default is `16`.
 * `-fft_decorrelation`: Whether or not to use FFT spatial decorrelation. If enabled, a lower learning rate should be used.
-* `-color_decorrelation`: Whether or not to use color decorrelation. Optionally provide a comma separated list of values for the color correlation matrix.
-* `-random_scale`: Whether or not to use random scaling. Optionally provide a comma separated list of values for scales to be selected from.
+* `-color_decorrelation`: Whether or not to use color decorrelation. Optionally provide a comma separated list of values for the color correlation matrix. If no values are provided, an attempt to load a color correlation matrix from the model file will be made before defaulting to the ImageNet color correlation matrix.
+* `-random_scale`: Whether or not to use random scaling. Optionally provide a comma separated list of values for scales to be randomly selected from. If no values are provided, then scales will be randomly selected from the following list: `1, 0.975, 1.025, 0.95, 1.05`.
+* `-random_rotation`: Whether or not to use random rotations. Optionally provide a comma separated list of degree values for rotations to be randomly selected from or a single value to use for randomly selecting degrees from `[-value, value]`. If no values are provided, then a range of `[-5, 5]` wil be used.
+* `-padding`: The amount of padding to use before random scaling and random rotations to prevent edge artifacts. The padding is then removed after the transforms. Default is set to `0` to disable it.
 
 **Processing options:**
 * `-batch_size`: How many channel visualization images to create in each batch. Default is `10`.
@@ -204,7 +206,7 @@ After training a new DeepDream model, you'll need to test it's visualizations. T
 * `-num_classes`: The number of classes that the model was trained on. Default is `120`.
 
 **Output options**:
-* `-output_dir`: Where to save output images. Default is set to current working directory.
+* `-output_dir`: Where to save output images. Default is set to the current working directory.
 * `-print_iter`: Print progress every `print_iter` iterations. Set to `0` to disable printing.
 * `-save_iter`: Save the images every `save_iter` iterations. Default is to `0` to disable saving intermediate results.
 
@@ -216,6 +218,12 @@ Basic FC (logits) layer visualization:
 
 ```
 python vis_multi.py -model_file <bvlc_out120>.pth
+```
+
+Advanced FC (logits) layer visualization:
+
+```
+python vis_multi.py -model_file <bvlc_out120>.pth -layer fc -color_decorrelation -fft_decorrelation -random_scale -random_rotation -lr 0.4 -output_dir <output_dir> -padding 16 -jitter 16,8
 ```
 
 ---
@@ -234,10 +242,12 @@ This script lets you create DeepDream hallucinations with trained GoogleNet mode
 * `-channel`: The specific layer channel you wish to use. Default is set to `-1` to disable specific channel selection.
 * `-extract_neuron`: If this flag is enabled, the center neuron will be extracted from the channel selected by the `-channel` parameter.
 * `-image_size`: A comma separated list of `<height>,<width>` to use for the output image. Default is set to `224,224`.
-* `-jitter`: The amount of image jitter to use for preprocessing. Default is `32`.
+* `-jitter`: The amount of image jitter to use for preprocessing. Default is `16`.
 * `-fft_decorrelation`: Whether or not to use FFT spatial decorrelation. If enabled, a lower learning rate should be used.
-* `-color_decorrelation`: Whether or not to use color decorrelation. Optionally provide a comma separated list of values for the color correlation matrix.
-* `-random_scale`: Whether or not to use random scaling. Optionally provide a comma separated list of values for scales to be selected from.
+* `-color_decorrelation`: Whether or not to use color decorrelation. Optionally provide a comma separated list of values for the color correlation matrix. If no values are provided, an attempt to load a color correlation matrix from the model file will be made before defaulting to the ImageNet color correlation matrix.
+* `-random_scale`: Whether or not to use random scaling. Optionally provide a comma separated list of values for scales to be randomly selected from. If no values are provided, then scales will be randomly selected from the following list: `1, 0.975, 1.025, 0.95, 1.05`.
+* `-random_rotation`: Whether or not to use random rotations. Optionally provide a comma separated list of degree values for rotations to be randomly selected from or a single value to use for randomly selecting degrees from `[-value, value]`. If no values are provided, then a range of `[-5, 5]` wil be used.
+* `-padding`: The amount of padding to use before random scaling and random rotations to prevent edge artifacts. The padding is then removed after the transforms. Default is set to `0` to disable it.
 
 **Only Required If Model Doesn't Contain Them, Options**:
 * `-data_mean`: Your precalculated list of mean values that was used to train the model, if they weren't saved inside the model.
@@ -257,6 +267,12 @@ Basic DeepDream:
 
 ```
 python vis.py -model_file <bvlc_out120>.pth -layer mixed5a
+```
+
+Advanced DeepDream:
+
+```
+python vis.py -model_file <bvlc_out120>.pth -layer mixed5a/conv_5x5_relu -channel 9 -color_decorrelation -fft_decorrelation -random_scale -random_rotation -lr 0.4 -padding 16 -jitter 16,8
 ```
 
 ---
