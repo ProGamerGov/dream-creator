@@ -30,7 +30,7 @@ def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='c
 
 
 # Helper function to decorrelate content image
-def get_content_transforms(content_image, mod_list):
+def decorrelate_content(content_image, mod_list):
     s, c, t = None, None, None
     for i, mod in enumerate(mod_list):
         if isinstance(mod, SpatialDecorrelationLayer):
