@@ -40,11 +40,11 @@ def decorrelate_content(content_image, mod_list):
         if isinstance(mod, TransformLayer):
             t = i
 
-    if t != None: 
-        content_image = mod_list[t].untransform(content_image)  
+    if t != None:
+        content_image = mod_list[t].untransform(content_image)
     if c != None:
-        content_image = mod_list[c].decorrelate_color(content_image)     
-    if s != None:     
+        content_image = mod_list[c].decorrelate_color(content_image)
+    if s != None:
         content_image = mod_list[s].fft_image(content_image)
     return content_image
 
@@ -140,7 +140,7 @@ class TransformLayer(torch.nn.Module):
     def untransform(self, input):
         input = input.add(self.input_mean[None, :, None, None]).mul(self.input_sd[None, :, None, None])
         return input / self.r
-    
+
     def forward(self, input):
         input = torch.sigmoid(input) * self.r
         return input.sub(self.input_mean[None, :, None, None]).div(self.input_sd[None, :, None, None])
