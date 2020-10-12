@@ -29,6 +29,26 @@ def get_decorrelation_layers(image_size=(224,224), input_mean=[1,1,1], device='c
     return mod_list, deprocess_img
 
 
+# Helper function to decorrelate content image
+def decorrelate_content(content_image, mod_list):
+    s, c, t = None, None, None
+    for i, mod in enumerate(mod_list):
+        if isinstance(mod, SpatialDecorrelationLayer):
+            s = i
+        if isinstance(mod, ColorDecorrelationLayer):
+            c = i
+        if isinstance(mod, TransformLayer):
+            t = i
+
+    if t != None:
+        content_image = mod_list[t].untransform(content_image)
+    if c != None:
+        content_image = mod_list[c].decorrelate_color(content_image)
+    if s != None:
+        content_image = mod_list[s].fft_image(content_image)
+    return content_image
+
+
 # Spatial Decorrelation layer based on tensorflow/lucid & greentfrapp/lucent
 class SpatialDecorrelationLayer(torch.nn.Module):
 
@@ -56,6 +76,11 @@ class SpatialDecorrelationLayer(torch.nn.Module):
         results[:s] = torch.arange(0, s)
         results[s:] = torch.arange(-(v // 2), 0)
         return results * (1.0 / (v * d))
+
+    def fft_image(self, input):
+        input = input * 4
+        input = torch.rfft(input, 2, normalized=True)
+        return input / self.scale
 
     def ifft_image(self, input):
         input = input * self.scale
@@ -95,6 +120,10 @@ class ColorDecorrelationLayer(nn.Module):
         color_correlation_normalized = color_correlation_svd_sqrt / max_norm_svd_sqrt
         return color_correlation_normalized.T
 
+    def decorrelate_color(self, input):
+        inverse = torch.inverse(self.color_correlation_n)
+        return torch.matmul(input.permute(0,2,3,1), inverse).permute(0,3,1,2)
+
     def forward(self, input):
         return torch.matmul(input.permute(0,2,3,1), self.color_correlation_n).permute(0,3,1,2)
 
@@ -107,6 +136,10 @@ class TransformLayer(torch.nn.Module):
         self.input_mean = torch.as_tensor(input_mean).to(device)
         self.input_sd = torch.as_tensor([1,1,1]).to(device)
         self.r = r
+
+    def untransform(self, input):
+        input = input.add(self.input_mean[None, :, None, None]).mul(self.input_sd[None, :, None, None])
+        return input / self.r
 
     def forward(self, input):
         input = torch.sigmoid(input) * self.r

@@ -7,7 +7,7 @@ import torch.optim as optim
 
 from utils.inceptionv1_caffe import relu_to_redirected_relu
 from utils.vis_utils import preprocess, simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_simple_hook
-from utils.decorrelation import get_decorrelation_layers, RandomScaleLayer, RandomRotationLayer, CenterCropLayer
+from utils.decorrelation import get_decorrelation_layers, RandomScaleLayer, RandomRotationLayer, CenterCropLayer, decorrelate_content
 
 
 def main():
@@ -115,6 +115,8 @@ def main_func(params):
             input_tensor = torch.randn(3, *params.image_size).unsqueeze(0).to(params.use_device) * 0.01
     else:
         input_tensor = preprocess(params.content_image, params.image_size, params.data_mean, params.not_caffe).to(params.use_device)
+        if params.fft_decorrelation != 'none' or params.color_decorrelation != 'none':
+            input_tensor = decorrelate_content(input_tensor, mod_list)
 
     print('Running optimization with ADAM')
 
