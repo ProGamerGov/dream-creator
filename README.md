@@ -258,6 +258,11 @@ This script lets you create DeepDream hallucinations with trained GoogleNet mode
 * `-print_iter`: Print progress every `print_iter` iterations. Set to `0` to disable printing.
 * `-save_iter`: Save the images every `save_iter` iterations. Default is to `0` to disable saving intermediate results.
 
+**Tiling options:**
+* `-tile_size`: The desired tile size to use. Default is set to `0` to disable tiling.
+* `-overlap_percent`: The percentage of overlap to use for the tiles. Default is `0.5`.
+* `-tile_iter`: Default is `50`.
+
 **Other options:**
 * `-use_device`: Zero-indexed ID of the GPU to use plus `cuda:`. Default is `cuda:0`.
 * `-seed`: An integer value that you can specify for repeatable results. By default this value is random for each run.
