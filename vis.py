@@ -83,7 +83,6 @@ def main_func(params):
                 params.color_decorrelation = torch.load(params.model_file)['color_correlation_svd_sqrt']
             except:
                 pass
-        #scale_size = [params.tile_size] *2 if params.tile_size > 0 else params.image_size
         d_layers, deprocess_img = get_decorrelation_layers(image_size=params.image_size, input_mean=params.data_mean, device=params.use_device, \
                                                            decorrelate=(params.fft_decorrelation, params.color_decorrelation), decay_power=params.decay_power)
         mod_list += d_layers
