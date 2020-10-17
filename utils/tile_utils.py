@@ -106,8 +106,7 @@ def rebuild_tensor(tiles, size, tile_size, tile_overlap):
 def get_new_size(base_size, old_size, new_size):
     old_size = [old_size] * 2 if type(old_size) is not tuple and type(old_size) is not list else old_size
     new_size = [new_size] * 2 if type(new_size) is not tuple and type(new_size) is not list else new_size
-    h = int((new_size[0] / old_size[0]) * base_size[2])
-    w = int((new_size[1] / old_size[1]) * base_size[3])
+    h, w = int((new_size[0] / old_size[0]) * base_size[2]), int((new_size[1] / old_size[1]) * base_size[3])
     return (base_size[0], base_size[1], h, w)
 
 
