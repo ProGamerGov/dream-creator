@@ -2,9 +2,9 @@ import torch
 
 
 # Create blend masks
-def create_lin_mask(overlap, d, d2, rotate, c, device):
+def create_lin_mask(overlap, d, d2, rotate, c, special, device):
     mask_tensors = []
-    if d-(overlap*2) > 0 and rotate != 2 and rotate != 3:
+    if d-(overlap*2) > 0 and rotate != 2 and rotate != 3 and special == 1:
         mask_tensors += [torch.zeros(d-(overlap*2), device=device)]
         ones_size = overlap
     else:
@@ -15,18 +15,17 @@ def create_lin_mask(overlap, d, d2, rotate, c, device):
 
 
 # Apply blend masks to tiles
-def mask_tile(tile, overlap, side='left'):
+def mask_tile(tile, overlap, side='left', special=[0,0,0,0]):
     c, h, w = tile.size(1), tile.size(2), tile.size(3)
     base_mask = torch.ones_like(tile)
     if 'left' in side:
-        base_mask = base_mask * create_lin_mask(overlap[3], w, h, 0, c, tile.device)
+        base_mask = base_mask * create_lin_mask(overlap[3], w, h, 0, c, special[3], tile.device)
     if 'bottom' in side:
-        base_mask = base_mask * create_lin_mask(overlap[1], h, w, 1, c, tile.device)
+        base_mask = base_mask * create_lin_mask(overlap[1], h, w, 1, c, special[1], tile.device)
     if 'right' in side:
-        base_mask = base_mask * create_lin_mask(overlap[2], w, h, 2, c, tile.device)
+        base_mask = base_mask * create_lin_mask(overlap[2], w, h, 2, c, special[2], tile.device)
     if 'top' in side:
-        base_mask = base_mask * create_lin_mask(overlap[0], h, w, 3, c, tile.device)
-
+        base_mask = base_mask * create_lin_mask(overlap[0], h, w, 3, c, special[0], tile.device)
     # Apply mask to tile and return masked tile
     return tile * base_mask
 
@@ -60,7 +59,9 @@ def add_tiles(tiles, base_tensor, tile_coords, tile_size, overlap):
                 mask_sides += ',left'
                 c_overlap[3] = f_ovlp[1] if f_ovlp[1] > 0 else c_overlap[3]
 
-            tile = mask_tile(tiles[t], c_overlap, side=mask_sides)
+            special = [1 if c_overlap[i] != overlap[i] else 0 for i in range(4)]
+
+            tile = mask_tile(tiles[t], c_overlap, side=mask_sides, special=special)
             base_tensor[:, :, y:y+tile_size[0], x:x+tile_size[1]] = base_tensor[:, :, y:y+tile_size[0], x:x+tile_size[1]] + tile
             t+=1; column+=1
         row+=1; column=0
@@ -106,7 +107,8 @@ def rebuild_tensor(tiles, size, tile_size, tile_overlap):
 def get_new_size(base_size, old_size, new_size):
     old_size = [old_size] * 2 if type(old_size) is not tuple and type(old_size) is not list else old_size
     new_size = [new_size] * 2 if type(new_size) is not tuple and type(new_size) is not list else new_size
-    h, w = int((new_size[0] / old_size[0]) * base_size[2]), int((new_size[1] / old_size[1]) * base_size[3])
+    h = int((new_size[0] / old_size[0]) * base_size[2])
+    w = int((new_size[1] / old_size[1]) * base_size[3])
     return (base_size[0], base_size[1], h, w)
 
 
