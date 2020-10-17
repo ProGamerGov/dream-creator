@@ -43,7 +43,6 @@ def main():
     parser.add_argument("-tile_size", type=int, default=0)
     parser.add_argument("-tile_overlap", type=float, default=0.5)
     parser.add_argument("-tile_iter", type=int, default=50)
-    parser.add_argument("-roll", type=int, default=0)
 
     # Other options
     parser.add_argument("-use_device", type=str, default='cuda:0')
