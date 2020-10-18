@@ -151,6 +151,8 @@ def main_func(params):
             if params.save_iter > 0 and dream_iter > 0 and dream_iter % params.save_iter == 0:
                 if deprocess_img != None:
                     save_tensor = deprocess_img(output_tensor.clone().detach())
+                else:
+                    save_tensor = output_tensor.clone().detach()
                 simple_deprocess(save_tensor, filename + '_' + str(dream_iter) + ext, params.data_mean, params.not_caffe)
 
             if params.num_iterations > 1:
