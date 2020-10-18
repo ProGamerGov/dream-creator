@@ -40,24 +40,26 @@ def add_tiles(tiles, base_tensor, tile_coords, tile_size, overlap):
     for y in tile_coords[0]:
         for x in tile_coords[1]:
             mask_sides, c_overlap = '', overlap.copy()
-            if row == 0:
-                mask_sides += 'bottom'
-                c_overlap[1] = f_ovlp[0] if row == len(tile_coords[0]) - 2 else c_overlap[1]
-            elif row > 0 and row < len(tile_coords[0]) -1:
-                mask_sides += 'bottom,top'
-                c_overlap[1] = f_ovlp[0] if row == len(tile_coords[0]) - 2 and f_ovlp[0] > 0 else c_overlap[1]
-            elif row == len(tile_coords[0]) -1:
-                mask_sides += 'top'
-                c_overlap[0] = f_ovlp[0] if f_ovlp[0] > 0 else c_overlap[0]
-            if column == 0:
-                mask_sides += ',right'
-                c_overlap[2] = f_ovlp[1] if column == len(tile_coords[1]) -2 else c_overlap[2]
-            elif column > 0 and column < len(tile_coords[1]) -1:
-                mask_sides += ',right,left'
-                c_overlap[2] = f_ovlp[1] if column == len(tile_coords[1]) -2 and f_ovlp[1] > 0 else c_overlap[2]
-            elif column == len(tile_coords[1]) -1:
-                mask_sides += ',left'
-                c_overlap[3] = f_ovlp[1] if f_ovlp[1] > 0 else c_overlap[3]
+            if tile_coords[0] != [0]:
+                if row == 0:
+                    mask_sides += 'bottom'
+                    c_overlap[1] = f_ovlp[0] if row == len(tile_coords[0]) - 2 else c_overlap[1]
+                elif row > 0 and row < len(tile_coords[0]) -1:
+                    mask_sides += 'bottom,top'
+                    c_overlap[1] = f_ovlp[0] if row == len(tile_coords[0]) - 2 and f_ovlp[0] > 0 else c_overlap[1]
+                elif row == len(tile_coords[0]) -1:
+                    mask_sides += 'top'
+                    c_overlap[0] = f_ovlp[0] if f_ovlp[0] > 0 else c_overlap[0]
+            if tile_coords[1] != [0]:
+                if column == 0:
+                    mask_sides += ',right'
+                    c_overlap[2] = f_ovlp[1] if column == len(tile_coords[1]) -2 else c_overlap[2]
+                elif column > 0 and column < len(tile_coords[1]) -1:
+                    mask_sides += ',right,left'
+                    c_overlap[2] = f_ovlp[1] if column == len(tile_coords[1]) -2 and f_ovlp[1] > 0 else c_overlap[2]
+                elif column == len(tile_coords[1]) -1:
+                    mask_sides += ',left'
+                    c_overlap[3] = f_ovlp[1] if f_ovlp[1] > 0 else c_overlap[3]
 
             special = [1 if c_overlap[i] != overlap[i] else 0 for i in range(4)]
 
