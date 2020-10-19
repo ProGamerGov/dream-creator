@@ -129,7 +129,7 @@ def main_func(params):
     # Create visualization(s)
     if params.tile_size == 0:
         output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.save_iter, \
-                          params.print_iter, params.output_image, [params.data_mean, params.not_caffe], deprocess_img)
+                              params.print_iter, params.output_image, [params.data_mean, params.not_caffe], deprocess_img)
     else:
         filename, ext = os.path.splitext(params.output_image)
         t_size, t_pattern, t_num = get_tiling_info((1,3,*params.image_size), params.tile_size, params.tile_overlap)
