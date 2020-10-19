@@ -8,6 +8,7 @@ import torch.optim as optim
 from utils.inceptionv1_caffe import relu_to_redirected_relu
 from utils.vis_utils import preprocess, simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_simple_hook
 from utils.decorrelation import get_decorrelation_layers, RandomScaleLayer, RandomRotationLayer, CenterCropLayer, decorrelate_content
+from utils.tile_utils import tile_tensor, rebuild_tensor, get_tiling_info, handle_spectral
 
 
 def main():
@@ -38,6 +39,11 @@ def main():
     parser.add_argument("-random_rotation", help="", nargs="?", type=str, const="none")
     parser.add_argument("-padding", type=int, default=0)
 
+    # Tiling options
+    parser.add_argument("-tile_size", type=int, default=0)
+    parser.add_argument("-tile_overlap", type=float, default=25.0)
+    parser.add_argument("-tile_iter", type=int, default=50)
+
     # Other options
     parser.add_argument("-use_device", type=str, default='cuda:0')
     parser.add_argument("-not_caffe", action='store_true')
@@ -45,6 +51,7 @@ def main():
     parser.add_argument("-no_branches", action='store_true')
     params = parser.parse_args()
     params.image_size = [int(m) for m in params.image_size.split(',')]
+    params.tile_overlap = params.tile_overlap / 100 if params.tile_overlap > 1 else params.tile_overlap
     main_func(params)
 
 
@@ -121,11 +128,41 @@ def main_func(params):
     print('Running optimization with ADAM')
 
     # Create visualization(s)
-    output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.save_iter, \
-                          params.print_iter, params.output_image, [params.data_mean, params.not_caffe], deprocess_img)
+    if params.tile_size == 0:
+        output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.save_iter, \
+                              params.print_iter, params.output_image, [params.data_mean, params.not_caffe], deprocess_img)
+    else:
+        filename, ext = os.path.splitext(params.output_image)
+        t_size, t_pattern, t_num = get_tiling_info((1,3,*params.image_size), params.tile_size, params.tile_overlap)
+        print('\nTile pattern', str(t_pattern).replace(', ', 'x'), '\nNumber of tiles', t_num, '\n')
+        is_spectral = True if input_tensor.dim() == 5 else False
+        for dream_iter in range(1, params.num_iterations+1):
+            input_tensor = handle_spectral(input_tensor, mod_list, params.image_size, params.decay_power) if is_spectral else input_tensor
+            tensor_tiles, output_tiles = tile_tensor(input_tensor.clone(), tile_size=params.tile_size, tile_overlap=params.tile_overlap), []
+            for i, tile in enumerate(tensor_tiles):
+                print('Processing tile', i+1, 'of', len(tensor_tiles))
+                tile = handle_spectral(tile, mod_list, params.tile_size, params.decay_power) if is_spectral else tile
+                tile = dream(net, tile.clone().detach(), params.tile_iter, params.lr, loss_modules, 0, params.print_iter, 'None', None, None)
+                output_tiles.append(tile)
+
+            output_tiles = handle_spectral(output_tiles, mod_list, params.tile_size, params.decay_power) if is_spectral else output_tiles
+            output_tensor = rebuild_tensor(output_tiles, input_tensor.size(), tile_size=params.tile_size, tile_overlap=params.tile_overlap)
+            output_tensor = handle_spectral(output_tensor, mod_list, params.image_size, params.decay_power) if is_spectral else output_tensor
+
+            if params.save_iter > 0 and dream_iter > 0 and dream_iter % params.save_iter == 0:
+                if deprocess_img != None:
+                    save_tensor = deprocess_img(output_tensor.clone().detach())
+                else:
+                    save_tensor = output_tensor.clone().detach()
+                simple_deprocess(save_tensor, filename + '_' + str(dream_iter) + ext, params.data_mean, params.not_caffe)
+
+            if params.num_iterations > 1:
+                input_tensor = output_tensor.clone()
+
     if deprocess_img != None:
         output_tensor = deprocess_img(output_tensor)
     simple_deprocess(output_tensor, params.output_image, params.data_mean, params.not_caffe)
+
 
 
 # Function to maximize CNN activations

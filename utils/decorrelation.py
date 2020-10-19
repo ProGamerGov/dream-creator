@@ -55,23 +55,27 @@ class SpatialDecorrelationLayer(torch.nn.Module):
 
     def __init__(self, image_size=(224,224), decay_power=1.0, device='cpu'):
         super(SpatialDecorrelationLayer, self).__init__()
-        self.h = image_size[0]
-        self.w = image_size[1]
-        self.scale = self.create_scale(decay_power).to(device)
+        self.setup_scale(image_size, decay_power, device)
 
-    def create_scale(self, decay_power=1.0):
-        freqs = self.rfft2d_freqs()
+    def setup_scale(self, image_size, decay_power=1.0, device='cpu'):
+        self.h, self.w = image_size[0], image_size[1]
+        self.scale = self.create_scale(image_size, decay_power).to(device)
+
+    def create_scale(self, size, decay_power=1.0):
+        freqs = SpatialDecorrelationLayer.rfft2d_freqs(*size)
         self.freqs_shape = freqs.size() + (2,)
-        scale = 1.0 / torch.max(freqs, torch.full_like(freqs, 1.0 / (max(self.w, self.h)))) ** decay_power
+        scale = 1.0 / torch.max(freqs, torch.full_like(freqs, 1.0 / max(size))) ** decay_power
         return scale[None, None, ..., None]
 
-    def rfft2d_freqs(self):
-        fy = self.pytorch_fftfreq(self.h)[:, None]
-        wadd = 2 if self.w % 2 == 1 else 1
-        fx = self.pytorch_fftfreq(self.w)[: self.w // 2 + wadd]
+    @staticmethod
+    def rfft2d_freqs(h, w):
+        fy = SpatialDecorrelationLayer.pytorch_fftfreq(h)[:, None]
+        wadd = 2 if w % 2 == 1 else 1
+        fx = SpatialDecorrelationLayer.pytorch_fftfreq(w)[: w // 2 + wadd]
         return torch.sqrt((fx * fx) + (fy * fy))
 
-    def pytorch_fftfreq(self, v, d=1.0):
+    @staticmethod
+    def pytorch_fftfreq(v, d=1.0):
         results = torch.empty(v)
         s = (v - 1) // 2 + 1
         results[:s] = torch.arange(0, s)
