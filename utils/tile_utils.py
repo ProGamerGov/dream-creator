@@ -32,7 +32,7 @@ def mask_tile(tile, overlap, side='left', special=[0,0,0,0]):
 
 # Put tensor tiles back together
 def add_tiles(tiles, base_tensor, tile_coords, tile_size, overlap):
-    # Check for any tiles that need different overlap values
+    # Collect required info any tiles that need different overlap values
     r, c = len(tile_coords[0]), len(tile_coords[1])
     f_ovlp = (tile_coords[0][r-1] - tile_coords[0][r-2], tile_coords[1][c-1] - tile_coords[1][c-2])
 
