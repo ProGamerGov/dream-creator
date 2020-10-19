@@ -2,13 +2,13 @@ import torch
 
 
 # Create blend masks
-def create_lin_mask(overlap, d, d2, rotate, c, special, device):
+def create_lin_mask(overlap, d, d2, rotate, c, special_overlap, device):
     mask_tensors = []
-    if d-(overlap*2) > 0 and rotate != 2 and rotate != 3 and special == 1:
-        mask_tensors += [torch.zeros(d-(overlap*2), device=device)]
-        ones_size = overlap
+    if rotate != 1 and rotate != 2 and special_overlap != overlap:
+        ones_size = special_overlap
+        mask_tensors += [torch.zeros(d - (special_overlap + overlap), device=device)]
     else:
-        ones_size = d-overlap
+        ones_size = d - overlap
     mask_tensors += [torch.linspace(0,1, overlap, device=device)]
     mask_tensors += [torch.ones(ones_size, device=device)]
     return torch.cat(mask_tensors, 0).repeat(d2,1).rot90(rotate).repeat(c,1,1).unsqueeze(0)
@@ -63,7 +63,7 @@ def add_tiles(tiles, base_tensor, tile_coords, tile_size, overlap):
 
             special = [1 if c_overlap[i] != overlap[i] else 0 for i in range(4)]
 
-            tile = mask_tile(tiles[t], c_overlap, side=mask_sides, special=special)
+            tile = mask_tile(tiles[t], overlap.copy(), side=mask_sides, special=c_overlap)
             base_tensor[:, :, y:y+tile_size[0], x:x+tile_size[1]] = base_tensor[:, :, y:y+tile_size[0], x:x+tile_size[1]] + tile
             t+=1; column+=1
         row+=1; column=0
