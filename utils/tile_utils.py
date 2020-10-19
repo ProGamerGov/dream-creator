@@ -61,8 +61,6 @@ def add_tiles(tiles, base_tensor, tile_coords, tile_size, overlap):
                     mask_sides += ',left'
                     c_overlap[3] = f_ovlp[1] if f_ovlp[1] > 0 else c_overlap[3]
 
-            special = [1 if c_overlap[i] != overlap[i] else 0 for i in range(4)]
-
             tile = mask_tile(tiles[t], overlap.copy(), side=mask_sides, special=c_overlap)
             base_tensor[:, :, y:y+tile_size[0], x:x+tile_size[1]] = base_tensor[:, :, y:y+tile_size[0], x:x+tile_size[1]] + tile
             t+=1; column+=1
