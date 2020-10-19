@@ -41,7 +41,7 @@ def main():
 
     # Tiling options
     parser.add_argument("-tile_size", type=int, default=0)
-    parser.add_argument("-tile_overlap", type=float, default=0.5)
+    parser.add_argument("-tile_overlap", type=float, default=25.0)
     parser.add_argument("-tile_iter", type=int, default=50)
 
     # Other options
@@ -51,6 +51,7 @@ def main():
     parser.add_argument("-no_branches", action='store_true')
     params = parser.parse_args()
     params.image_size = [int(m) for m in params.image_size.split(',')]
+    params.tile_overlap = params.tile_overlap / 100 if params.tile_overlap > 1 else params.tile_overlap
     main_func(params)
 
 
