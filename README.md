@@ -260,7 +260,7 @@ This script lets you create DeepDream hallucinations with trained GoogleNet mode
 
 **Tiling options:**
 * `-tile_size`: The desired tile size to use. Default is set to `0` to disable tiling.
-* `-tile_overlap`: The percentage of overlap to use for the tiles. Default is `0.5`for 50% overlap.
+* `-tile_overlap`: The percentage of overlap to use for the tiles. Default is `25`for 25% overlap. Overlap percetanges over 50% will result in problems.
 * `-tile_iter`: Default is `50`.
 
 **Other options:**
