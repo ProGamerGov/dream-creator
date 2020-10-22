@@ -21,9 +21,9 @@ def mask_tile(tile, overlap, special=[0,0,0,0], side='left', s_sides=[False,Fals
     if 'left' in side:
         base_mask = base_mask * create_lin_mask(overlap[3], special[3], s_sides[1], w, h, 0, c, tile.device)
     if 'bottom' in side:
-        base_mask = base_mask * create_lin_mask(overlap[1], special[1], 0, h, w, 1, c, tile.device)
+        base_mask = base_mask * create_lin_mask(overlap[1], special[1], False, h, w, 1, c, tile.device)
     if 'right' in side:
-        base_mask = base_mask * create_lin_mask(overlap[2], special[2], 0, w, h, 2, c, tile.device)
+        base_mask = base_mask * create_lin_mask(overlap[2], special[2], False, w, h, 2, c, tile.device)
     if 'top' in side:
         base_mask = base_mask * create_lin_mask(overlap[0], special[0], s_sides[0], h, w, 3, c, tile.device)
     # Apply mask to tile and return masked tile
