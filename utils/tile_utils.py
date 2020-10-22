@@ -4,7 +4,7 @@ import torch
 # Create blend masks
 def create_lin_mask(overlap, special_overlap, is_special, d, d2, rotate, c, device):
     mask_tensors = []
-    if rotate != 1 and rotate != 2 and is_special:
+    if is_special:
         ones_size = special_overlap
         mask_tensors += [torch.zeros(d - (special_overlap + overlap), device=device)]
     else:
