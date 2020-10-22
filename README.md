@@ -21,7 +21,7 @@ Here are some example visualizations created with custom DeepDream models traine
 <img src="https://raw.githubusercontent.com/ProGamerGov/dream-creator/master/examples/small/fc_jetski.jpg" height="250px">
 
 <img src="https://raw.githubusercontent.com/ProGamerGov/dream-creator/master/examples/small/fc_sunglasses.jpg" height="250px">
-<img src="https://raw.githubusercontent.com/ProGamerGov/dream-creator/master/examples/small/fc_surboard.jpg" height="250px">
+<img src="https://raw.githubusercontent.com/ProGamerGov/dream-creator/master/examples/small/fc_surfboard.jpg" height="250px">
 <img src="https://raw.githubusercontent.com/ProGamerGov/dream-creator/master/examples/small/fc_tent.jpg" height="250px">
 
 <img src="https://raw.githubusercontent.com/ProGamerGov/dream-creator/master/examples/small/fc_bike.jpg" height="250px">
