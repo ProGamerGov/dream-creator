@@ -52,6 +52,7 @@ def main():
     params = parser.parse_args()
     params.image_size = [int(m) for m in params.image_size.split(',')]
     params.tile_size = [int(m) for m in params.tile_size.split(',')]
+    params.tile_size = [params.tile_size[0]] * 2 if len(params.tile_size) == 1 else params.tile_size
     params.tile_overlap = params.tile_overlap / 100 if params.tile_overlap > 1 else params.tile_overlap
     main_func(params)
 
