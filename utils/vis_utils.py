@@ -7,10 +7,10 @@ from PIL import Image
 from utils.inceptionv1_caffe import InceptionV1_Caffe
 
 
-def calc_image_size(image_path, size):
+def calc_image_size(image_path, image_size):
     image = Image.open(image_path).convert('RGB')
-    if type(size) is not tuple and type(size) is not list or len(size) == 1:
-        image_size = size[0] if len(size) == 1 else image_size
+    if type(image_size) is not tuple and type(image_size) is not list or len(image_size) == 1:
+        image_size = image_size[0] if len(image_size) == 1 else image_size
         image_size = tuple([int((float(image_size) / max(image.size))*x) for x in (image.height, image.width)])
     return image_size
 
