@@ -241,7 +241,7 @@ This script lets you create DeepDream hallucinations with trained GoogleNet mode
 * `-layer`: The specific layer you wish to use. Default is set to `mixed5a`.
 * `-channel`: The specific layer channel you wish to use. Default is set to `-1` to disable specific channel selection.
 * `-extract_neuron`: If this flag is enabled, the center neuron will be extracted from the channel selected by the `-channel` parameter.
-* `-image_size`: A comma separated list of `<height>,<width>` to use for the output image. If a single value is provided along with a content image, then the minimum side length will be calculated automatically. Default is set to `224,224`.
+* `-image_size`: A comma separated list of `<height>,<width>` to use for the output image. If a single value for maximum side length is provided along with a content image, then the minimum side length will be calculated automatically. Default is set to `224,224`.
 * `-jitter`: The amount of image jitter to use for preprocessing. Default is `16`.
 * `-fft_decorrelation`: Whether or not to use FFT spatial decorrelation. If enabled, a lower learning rate should be used.
 * `-color_decorrelation`: Whether or not to use color decorrelation. Optionally provide a comma separated list of values for the color correlation matrix. If no values are provided, an attempt to load a color correlation matrix from the model file will be made before defaulting to the ImageNet color correlation matrix.
