@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from utils.inceptionv1_caffe import relu_to_redirected_relu
-from utils.vis_utils import preprocess, simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_simple_hook
+from utils.vis_utils import preprocess, simple_deprocess, load_model, set_seed, mean_loss, ModelPlus, Jitter, register_simple_hook, calc_image_size
 from utils.decorrelation import get_decorrelation_layers, RandomScaleLayer, RandomRotationLayer, CenterCropLayer, decorrelate_content
 from utils.tile_utils import tile_tensor, rebuild_tensor, get_tiling_info, handle_spectral
 
@@ -40,7 +40,7 @@ def main():
     parser.add_argument("-padding", type=int, default=0)
 
     # Tiling options
-    parser.add_argument("-tile_size", type=int, default=0)
+    parser.add_argument("-tile_size", default='0')
     parser.add_argument("-tile_overlap", type=float, default=25.0)
     parser.add_argument("-tile_iter", type=int, default=50)
 
@@ -51,11 +51,15 @@ def main():
     parser.add_argument("-no_branches", action='store_true')
     params = parser.parse_args()
     params.image_size = [int(m) for m in params.image_size.split(',')]
+    params.tile_size = [int(m) for m in params.tile_size.split(',')]
+    params.tile_size = [params.tile_size[0]] * 2 if len(params.tile_size) == 1 else params.tile_size
     params.tile_overlap = params.tile_overlap / 100 if params.tile_overlap > 1 else params.tile_overlap
     main_func(params)
 
 
 def main_func(params):
+    if params.content_image != '':
+        params.image_size = calc_image_size(params.content_image, params.image_size)
     if params.seed > -1:
         set_seed(params.seed)
 
@@ -128,7 +132,7 @@ def main_func(params):
     print('Running optimization with ADAM')
 
     # Create visualization(s)
-    if params.tile_size == 0:
+    if params.tile_size[0] == 0:
         output_tensor = dream(net, input_tensor, params.num_iterations, params.lr, loss_modules, params.save_iter, \
                               params.print_iter, params.output_image, [params.data_mean, params.not_caffe], deprocess_img)
     else:
