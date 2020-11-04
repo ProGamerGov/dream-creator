@@ -21,13 +21,13 @@ All of these scripts with the exception of `sort_images.py` can be copied to and
 
    7. [Automatic Image Sorter](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#automatic-image-sorter)
 
-2. [Model Tools]()
+2. [Model Tools](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#model-editing)
 
    1. [Reduce Model Size](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#reduce-model-size)
 
    2. [Add/Change Model Values](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#addchange-model-values)
 
-3. [Visualization & Training Tools]()
+3. [Visualization & Training Tools](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#comparison-of-results)
 
    1. [Graph Training Data](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#graph-training-data)
 
