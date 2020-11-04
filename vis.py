@@ -61,7 +61,7 @@ def main_func(params):
     if params.content_image != '':
         params.image_size = calc_image_size(params.content_image, params.image_size)
     else:
-        assert len(image_size) > 1, "two -image_size values are required when not using a content image"
+        assert len(params.image_size) > 1, "two -image_size values are required when not using a content image"
 
     if params.seed > -1:
         set_seed(params.seed)
