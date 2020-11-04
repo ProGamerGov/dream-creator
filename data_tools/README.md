@@ -9,7 +9,7 @@ All of these scripts with the exception of `sort_images.py` can be copied to and
 
    1. [Dataset Mean and Standard Deviation Calculation](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#dataset-mean-and-standard-deviation-calculation)
 
-   2. [Dataset RGB Covariance Matrix Calculation](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#dataset-rgb-covariance-matrix-calculation)
+   2. [Dataset Color Correlation Matrix Calculation](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#dataset-color-correlation-matrix-calculation)
 
    3. [FC Channel Contents](https://github.com/ProGamerGov/dream-creator/tree/master/data_tools#fc-channel-contents)
 
@@ -50,9 +50,9 @@ python calc_ms.py -data_path <training_data>
 * `-use_rgb`: Enabling this flag will result in output values being in RGB format instead of BGR.
 
 
-## Dataset RGB Covariance Matrix Calculation
+## Dataset Color Correlation Matrix Calculation
 
-This script calculates the RGB covariance matrix required for color decorrelation.
+This script calculates the color correlation matrix required for color decorrelation.
 
 ```
 python calc_cm.py -data_path <training_data>
