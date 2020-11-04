@@ -125,6 +125,13 @@ python data_tools/calc_ms.py -data_path <training_data>
 
 Now you can start training your DeepDream model by running the GoogleNet training script. It's recommended that you save the model every 5-10 epochs in order to monitor the quality of the visualizations.
 
+After training your models, you can add a color correlation matrix to them for color decorrelation with the following command:
+
+
+```
+python data_tools/calc_cm.py -data_path <training_data> -model_file <bvlc_out120>.pth
+```
+
 
 ---
 
