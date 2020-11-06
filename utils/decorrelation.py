@@ -84,14 +84,14 @@ class SpatialDecorrelationLayer(torch.nn.Module):
         return results * (1.0 / (v * d))
 
     def fft_image(self, input):
-        #input = input * 4
+        input = input * 4
         input = torch.rfft(input, 2, normalized=True)
         return input / self.scale
 
     def ifft_image(self, input):
         input = input * self.scale
         input = torch.irfft(input, 2, normalized=True, signal_sizes=(self.h, self.w))
-        #return input / 4
+        return input / 4
 
     def forward(self, input):
         return self.ifft_image(input)
