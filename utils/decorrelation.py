@@ -136,20 +136,20 @@ class ColorDecorrelationLayer(nn.Module):
 # Preprocess input after decorrelation
 class TransformLayer(torch.nn.Module):
 
-    def __init__(self, input_mean=[1,1,1], r=255, device='cpu'):
+    def __init__(self, input_mean=[1,1,1], input_sd=[1,1,1], r=255, device='cpu'):
         super(TransformLayer, self).__init__()
-        self.input_mean = torch.as_tensor(input_mean).to(device)
-        self.input_sd = torch.as_tensor([1,1,1]).to(device)
+        self.input_mean = torch.as_tensor(input_mean).view(3, 1, 1).to(device)
+        self.input_sd = torch.as_tensor(input_sd).view(3, 1, 1).to(device)
         self.r = r
         self.activ = lambda x: torch.sigmoid(x)
 
     def untransform(self, input):
-        input = input.add(self.input_mean[None, :, None, None]).mul(self.input_sd[None, :, None, None])
+        input = (input + self.input_mean) * self.input_sd
         return input / self.r
 
     def forward(self, input):
         input = self.activ(input) * self.r
-        return input.sub(self.input_mean[None, :, None, None]).div(self.input_sd[None, :, None, None])
+        return (input - self.input_mean) / self.input_sd
 
 
 # Randomly scale an input
@@ -162,15 +162,11 @@ class RandomScaleLayer(torch.nn.Module):
         self.scale_list = scale_list
 
     def get_scale_mat(self, m, device, dtype):
-        scale_mat = torch.tensor(
-            [[m, 0.0, 0.0], [0.0, m, 0.0]], device=device, dtype=dtype
-        )
+        scale_mat = torch.tensor([[m, 0.0, 0.0], [0.0, m, 0.0]], device=device, dtype=dtype)
         return scale_mat
 
     def rescale_tensor(self, x, scale):
-        scale_matrix = self.get_scale_mat(scale, x.device, x.dtype)[None, ...].repeat(
-            x.shape[0], 1, 1
-        )
+        scale_matrix = self.get_scale_mat(scale, x.device, x.dtype)[None, ...].repeat(x.shape[0], 1, 1)
         grid = F.affine_grid(scale_matrix, x.size())
         x = F.grid_sample(x, grid)
         return x
