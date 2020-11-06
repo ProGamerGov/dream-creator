@@ -161,8 +161,19 @@ class RandomScaleLayer(torch.nn.Module):
         scale_list = [float(s) for s in scale_list.split(',')] if ',' in scale_list else scale_list
         self.scale_list = scale_list
 
-    def rescale_tensor(self, input, scale, align_corners=True):
-        return torch.nn.functional.interpolate(input, scale_factor=scale, mode='bilinear', align_corners=align_corners)
+    def get_scale_mat(self, m, device, dtype):
+        scale_mat = torch.tensor(
+            [[m, 0.0, 0.0], [0.0, m, 0.0]], device=device, dtype=dtype
+        )
+        return scale_mat
+
+    def rescale_tensor(self, x, scale):
+        scale_matrix = self.get_scale_mat(scale, x.device, x.dtype)[None, ...].repeat(
+            x.shape[0], 1, 1
+        )
+        grid = F.affine_grid(scale_matrix, x.size())
+        x = F.grid_sample(x, grid)
+        return x
 
     def forward(self, input):
         n = random.randint(0, len(self.scale_list)-1)
