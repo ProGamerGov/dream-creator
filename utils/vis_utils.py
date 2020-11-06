@@ -7,6 +7,9 @@ from PIL import Image
 from utils.inceptionv1_caffe import InceptionV1_Caffe
 
 
+Image.MAX_IMAGE_PIXELS = 1000000000 # Support gigapixel images
+
+
 def calc_image_size(image_path, image_size):
     image = Image.open(image_path).convert('RGB')
     if type(image_size) is not tuple and type(image_size) is not list or len(image_size) == 1:

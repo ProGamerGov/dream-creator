@@ -3,6 +3,9 @@ import argparse
 from PIL import Image
 
 
+Image.MAX_IMAGE_PIXELS = 1000000000 # Support gigapixel images
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-data_path", help="Path to your dataset", type=str, default='')
