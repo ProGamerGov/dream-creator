@@ -65,7 +65,6 @@ class SpatialDecorrelationLayer(torch.nn.Module):
         freqs = SpatialDecorrelationLayer.rfft2d_freqs(*size)
         self.freqs_shape = freqs.size() + (2,)
         scale = 1.0 / torch.max(freqs, torch.full_like(freqs, 1.0 / max(size))) ** decay_power
-        scale = scale * ((size[0] * size[1]) ** (1 / 2))
         return scale[None, None, ..., None]
 
     @staticmethod
