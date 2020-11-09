@@ -220,7 +220,7 @@ class SimpleDreamLossHook(torch.nn.Module):
         self.feature = input
 
     def forward(self, module, input, output):
-        output = self.extract_neuron(output) if self.get_neuron == True else output        
+        output = self.extract_neuron(output) if self.get_neuron == True else output
         if self.channel > -1:
             output = output[:,self.channel]
         else:
