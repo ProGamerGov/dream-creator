@@ -39,7 +39,7 @@ def main():
     parser.add_argument("-random_rotation", help="", nargs="?", type=str, const="none")
     parser.add_argument("-padding", type=int, default=0)
 
-    parser.add_argument("-layer_vis", choices=['deepdream', 'direction'], default='deepdream')    
+    parser.add_argument("-layer_vis", choices=['deepdream', 'direction'], default='deepdream')
     # Tiling options
     parser.add_argument("-tile_size", default='0')
     parser.add_argument("-tile_overlap", type=float, default=25.0)
