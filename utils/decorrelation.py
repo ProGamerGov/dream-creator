@@ -65,6 +65,7 @@ class SpatialDecorrelationLayer(torch.nn.Module):
         freqs = SpatialDecorrelationLayer.rfft2d_freqs(*size)
         self.freqs_shape = freqs.size() + (2,)
         scale = 1.0 / torch.max(freqs, torch.full_like(freqs, 1.0 / max(size))) ** decay_power
+        scale = scale * ((size[0] * size[1]) ** (1 / 2))
         return scale[None, None, ..., None]
 
     @staticmethod
@@ -83,14 +84,12 @@ class SpatialDecorrelationLayer(torch.nn.Module):
         return results * (1.0 / (v * d))
 
     def fft_image(self, input):
-        input = input * 4
-        input = torch.rfft(input, 2, normalized=True)
+        input = torch.rfft(input, 2, normalized=False)
         return input / self.scale
 
     def ifft_image(self, input):
         input = input * self.scale
-        input = torch.irfft(input, 2, normalized=True, signal_sizes=(self.h, self.w))
-        return input / 4
+        return torch.irfft(input, 2, normalized=False, signal_sizes=(self.h, self.w))
 
     def forward(self, input):
         return self.ifft_image(input)
