@@ -209,6 +209,7 @@ class SimpleDreamLossHook(torch.nn.Module):
         self.get_loss = loss_func
         self.mode = mode
         self.get_neuron = neuron
+        self.power = 2
 
     def extract_neuron(self, input):
         x = input.size(2) // 2
@@ -222,9 +223,11 @@ class SimpleDreamLossHook(torch.nn.Module):
         self.feature = input
 
     def forward(self, module, input, output):
+        output = self.extract_neuron(output) if self.get_neuron == True else output
         if self.channel > -1:
-            output = self.extract_neuron(output) if self.get_neuron == True else output
             output = output[:,self.channel]
+        else:
+            output = output ** self.power
         if self.mode == 'loss':
             self.forward_loss(output)
         elif self.mode == 'feature':

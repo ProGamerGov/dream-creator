@@ -38,6 +38,7 @@ def main():
     parser.add_argument("-random_scale", help="", nargs="?", type=str, const="none")
     parser.add_argument("-random_rotation", help="", nargs="?", type=str, const="none")
     parser.add_argument("-padding", type=int, default=0)
+    parser.add_argument("-layer_vis", choices=['deepdream', 'direction'], default='deepdream')
 
     # Tiling options
     parser.add_argument("-tile_size", default='0')
@@ -120,6 +121,9 @@ def main_func(params):
     net = ModelPlus(prep_net, cnn)
     loss_func = mean_loss
     loss_modules = register_simple_hook(net.net, params.layer, params.channel, loss_func=loss_func, neuron=params.extract_neuron)
+
+    if params.layer_vis == 'direction':
+        loss_modules[0].power = 1
 
     # Create input image
     if params.content_image == '':
