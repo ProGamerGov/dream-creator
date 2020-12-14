@@ -78,14 +78,14 @@ class InceptionV1_Caffe(nn.Module):
             lrn_vals = (9, 9.99999974738e-05, 0.5, 1)
             diff_channels = [204, 508, 48, 508]
 
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=(7, 7), stride=(2, 2), padding=(3,3), groups=1, bias=True)
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=(7, 7), stride=(2, 2), groups=1, bias=True)
         self.conv1_relu = ReluLayer()
         self.pool1 = nn.MaxPool2d(kernel_size=3, stride=2, padding=0)
         self.localresponsenorm1 = LocalResponseNormLayer(*lrn_vals)
 
         self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(1, 1), stride=(1, 1), groups=1, bias=True)
         self.conv2_relu = ReluLayer()
-        self.conv3 = nn.Conv2d(in_channels=64, out_channels=192, kernel_size=(3, 3), stride=(1, 1), padding=(1,1), groups=1, bias=True)
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=192, kernel_size=(3, 3), stride=(1, 1), groups=1, bias=True)
         self.conv3_relu = ReluLayer()
         self.localresponsenorm2 = LocalResponseNormLayer(*lrn_vals)
 
@@ -145,14 +145,16 @@ class InceptionV1_Caffe(nn.Module):
             self.aux2.loss_classifier.apply(self.initialize_layers)
 
     def forward(self, x):
+        x = F.pad(x, (2, 3, 2, 3))
         x = self.conv1(x)
         x = self.conv1_relu(x)
-        x = F.pad(x, (0, 1, 0, 1), value=float('-inf'))
+        x = F.pad(x, (0, 1, 0, 1), value=float("-inf"))
         x = self.pool1(x)
         x = self.localresponsenorm1(x)
 
         x = self.conv2(x)
         x = self.conv2_relu(x)
+        x = F.pad(x, (1, 1, 1, 1))
         x = self.conv3(x)
         x = self.conv3_relu(x)
         x = self.localresponsenorm2(x)
@@ -202,12 +204,12 @@ class InceptionModule(nn.Module):
 
         self.conv_3x3_reduce = nn.Conv2d(in_channels=in_channels, out_channels=c3x3reduce, kernel_size=(1, 1), stride=(1, 1), groups=1, bias=True)
         self.conv_3x3_reduce_relu = ReluLayer()
-        self.conv_3x3 = nn.Conv2d(in_channels=c3x3reduce, out_channels=c3x3, kernel_size=(3, 3), stride=(1, 1), padding=(1,1), groups=1, bias=True)
+        self.conv_3x3 = nn.Conv2d(in_channels=c3x3reduce, out_channels=c3x3, kernel_size=(3, 3), stride=(1, 1), groups=1, bias=True)
         self.conv_3x3_relu = ReluLayer()
 
         self.conv_5x5_reduce = nn.Conv2d(in_channels=in_channels, out_channels=c5x5reduce, kernel_size=(1, 1), stride=(1, 1), groups=1, bias=True)
         self.conv_5x5_reduce_relu = ReluLayer()
-        self.conv_5x5 = nn.Conv2d(in_channels=c5x5reduce, out_channels=c5x5, kernel_size=(5, 5), stride=(1, 1), padding=(2,2), groups=1, bias=True)
+        self.conv_5x5 = nn.Conv2d(in_channels=c5x5reduce, out_channels=c5x5, kernel_size=(5, 5), stride=(1, 1), groups=1, bias=True)
         self.conv_5x5_relu = ReluLayer()
 
         self.pool = nn.MaxPool2d(kernel_size=3, stride=1, padding=0)
@@ -220,18 +222,20 @@ class InceptionModule(nn.Module):
 
         c3x3 = self.conv_3x3_reduce(x)
         c3x3 = self.conv_3x3_reduce_relu(c3x3)
+        c3x3 = F.pad(c3x3, (1, 1, 1, 1))
         c3x3 = self.conv_3x3(c3x3)
         c3x3 = self.conv_3x3_relu(c3x3)
 
         c5x5 = self.conv_5x5_reduce(x)
         c5x5 = self.conv_5x5_reduce_relu(c5x5)
+        c5x5 = F.pad(c5x5, (2, 2, 2, 2))
         c5x5 = self.conv_5x5(c5x5)
         c5x5 = self.conv_5x5_relu(c5x5)
 
-        px = self.pool_proj(x)
-        px = self.pool_proj_relu(px)
-        px = F.pad(px, (1, 1, 1, 1), value=float('-inf'))
+        px = F.pad(x, (1, 1, 1, 1), value=float("-inf"))
         px = self.pool(px)
+        px = self.pool_proj(px)
+        px = self.pool_proj_relu(px)
         return torch.cat([c1x1, c3x3, c5x5, px], dim=1)
 
 
