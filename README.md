@@ -1,5 +1,7 @@
 # Dream-Creator
 
+[![DOI](https://zenodo.org/badge/288277298.svg)](https://zenodo.org/badge/latestdoi/288277298)
+
 This project aims to simplify the process of creating a custom DeepDream model by using pretrained GoogleNet models and custom image datasets.
 
 Here are some example visualizations created with custom DeepDream models trained on summer themed images:
