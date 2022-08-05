@@ -7,7 +7,7 @@ date-released: "2020-12-14"
 identifiers:
   - description: "This is the collection of archived snapshots of all versions of dream-creator"
     type: doi
-    value: 10.5281/zenodo.0000000
+    value: 10.5281/zenodo.6967391
 keywords:
   - "DeepDream"
   - research
