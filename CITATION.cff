@@ -1,0 +1,18 @@
+abstract: "This project aims to simplify the process of creating custom DeepDream models by using pretrained GoogleNet models and custom image datasets."
+authors:
+  - family-names: Egan
+    given-names: Ben
+cff-version: 1.2.0
+date-released: "2020-12-14"
+identifiers:
+  - description: "This is the collection of archived snapshots of all versions of dream-creator"
+    type: doi
+    value: 10.5281/zenodo.0000000
+keywords:
+  - "DeepDream"
+  - research
+license: MIT
+message: "If you use this software, please cite it using these metadata."
+repository-code: "https://github.com/ProGamerGov/dream-creator"
+title: "dream-creator"
+version: 1.0.0
